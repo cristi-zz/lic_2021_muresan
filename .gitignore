@@ -1,3 +1,22 @@
+# ReactNative
+node_modules/
+.expo/
+.expo-shared/
+.vscode\.react
+__generated__
+npm-debug.*
+package.json
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
+
+# macOS
+.DS_Store
+
 # Compiled class file
 *.class
 
