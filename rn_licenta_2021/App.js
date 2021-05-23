@@ -3,11 +3,12 @@ import React from 'react';
 import {AppLoading} from 'expo';
 import { StyleSheet, Text, View } from 'react-native';
 import {createDrawerNavigator} from 'react-navigation-drawer';
-import Navigator from './navigator/Navigator';
+import MainNavigation from './navigator/MainNavigator'
 
 export default function App() {
   return (
-      <Navigator />
+      //<Navigator />
+      <MainNavigation />
   );
 }
 
