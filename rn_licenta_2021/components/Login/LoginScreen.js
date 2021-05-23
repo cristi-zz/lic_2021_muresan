@@ -1,10 +1,5 @@
 import React from 'react';
 import { View, Text, StyleSheet, Button, TextInput, TouchableOpacity, ToastAndroid } from 'react-native';
-import { HeaderButtons, Item } from 'react-navigation-header-buttons';
-import { Ionicons } from '@expo/vector-icons';
-import CustomHeaderButton from '../HeaderButton';
-import { createStackNavigator } from 'react-navigation-stack';
-import { createAppContainer, NavigationActions } from 'react-navigation';
 import firebase from '../../firebase/firebase_config';
 
 

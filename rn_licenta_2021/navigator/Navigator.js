@@ -7,9 +7,7 @@ import NFCScreen from '../components/NFC/NFCScreen';
 import GPSScreen from '../components/GPS/GPSScreen';
 import CameraScreen from '../components/Camera/CameraScreen';
 import GyroscopeScreen from '../components/Gyroscope/GyroscopeScreen';
-import LoginScreen from '../components/Login/LoginScreen';
-import RegisterScreen from '../components/Login/Register';
-import App from '../App';
+
 
 const OverviewNavigator = createStackNavigator({
     Overview: Overview
@@ -29,16 +27,20 @@ const AppNavigator = createDrawerNavigator({
     Gyroscope: GyroscopeScreen
 },
     {
-        contentOptions: {
-            activeTintColor: '#3F855B',
-            itemStyle: {
-                marginVertical: 5
-                //marginTop: 40
-            },
-            itemsContainerStyle: {
-                marginTop: 50
-            }
-        },
+        defaultNavigationOptions: {
+            headerTitle: 'Blana',
+            headerTitleStyle: { alignSelf: 'center' }
+        }
+        // contentOptions: {
+        //     activeTintColor: '#3F855B',
+        //     itemStyle: {
+        //         marginVertical: 5
+        //         //marginTop: 40
+        //     },
+        //     itemsContainerStyle: {
+        //         marginTop: 50
+        //     }
+        // }
         
     });
 

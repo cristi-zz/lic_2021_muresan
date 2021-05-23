@@ -1,9 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Button, FlatList } from 'react-native';
 import { HeaderButtons, Item } from 'react-navigation-header-buttons';
-import { Ionicons } from '@expo/vector-icons';
 import CustomHeaderButton from '../HeaderButton';
-import NFCScreen from '../NFC/NFCScreen';
 import FunctionalityTile from './FunctionalityTile'
 
 const data = [
@@ -49,7 +47,7 @@ Overview.navigationOptions = (navData) => {
         navData.navigation.navigate({routeName:"Login"});
     };
     return {
-        headerTitle: 'Overview functionalities',
+        //headerTitle: 'Overview functionalities',
         headerStyle: {
             backgroundColor: '#962CA8'
         },
