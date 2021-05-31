@@ -1,24 +1,33 @@
-import React from 'react';
-import { View, Text, StyleSheet, Button, Pressable, TouchableHighlight, Switch, TouchableOpacity, Dimensions, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Button, Pressable, Dimensions, ScrollView} from 'react-native';
 import { HeaderButtons, Item } from 'react-navigation-header-buttons';
+import { Ionicons } from '@expo/vector-icons';
 import CustomHeaderButton from '../HeaderButton';
-import { Table, TableWrapper, Row, Rows, Col } from 'react-native-table-component';
-import { getPixelSizeForLayoutSize } from 'react-native/Libraries/Utilities/PixelRatio';
-import DataEntry from '../Data/DataEntry'
-import GPSDataEntry from './GPSDataEntry'
+import { TouchableOpacity } from 'react-native-gesture-handler';
+
 
 let color1 = '#3F855B';
 let color2 = '#7efcb1';
 let color3 = '#a83a32';
 let color4 = '#ab1f15';
 
-const GPSScreen = props => {
+const BluetoothScreen = props => {
     const onPressTurnOn = () => {
         console.log("Merge turn on!");
     };
+
     const onPressTurnOff = () => {
         console.log("Merge turn off!");
     };
+    const [blueDevices, setBlueDevice] = useState([]);
+
+    const addBlueDevice = () => {
+        setBlueDevice(currentDevices => [...currentDevices, "blana"]);
+    }
+    const clearBlueDevices = () => {
+        setBlueDevice(currentDevices => []);
+    };
+
     return (
         <View>
             <View style={styles.viewButton}>
@@ -29,13 +38,22 @@ const GPSScreen = props => {
                     <Text style={styles.text}>Turn Off</Text>
                 </Pressable>
             </View>
-            <GPSDataEntry />
+            <TouchableOpacity onPress={addBlueDevice} style={styles.bluetoothContainer}>
+                <Text style={styles.bluetoothDevicesText}>Find nearby devices</Text>
+                <Pressable onPress={clearBlueDevices} style={styles.clearButton}>
+                    <Text style={styles.bluetoothDevicesText} >Clear</Text>
+                </Pressable>
+            </TouchableOpacity>
+            <ScrollView>
+                {blueDevices.map((blueDevice) => {return (<View style={styles.bluetoothDeviceEntry}><Text>{blueDevice}</Text></View>);})}
+            </ScrollView>
         </View>
     );
 };
-GPSScreen.navigationOptions = (navData) => {
+
+BluetoothScreen.navigationOptions = (navData) => {
     return {
-        headerTitle: 'GPS',
+        headerTitle: 'Bluetooth',
         headerStyle: {
             backgroundColor: '#962CA8'
         },
@@ -78,20 +96,25 @@ const styles = StyleSheet.create({
         letterSpacing: 0.25,
         color: 'white',
     },
-    dataTitle: {
+    bluetoothContainer: {
+        backgroundColor: '#70db9b',
         width: Dimensions.get('window').width,
         height: 50,
-        backgroundColor: '#3F855B',
-        marginTop: 50,
+        marginTop: 70,
+        elevation: 10,
         justifyContent: 'center',
         flexDirection: 'row',
         alignContent: 'space-between'
     },
-    dataTitleText: {
+    bluetoothDevicesText: {
         textAlign: 'center',
         textAlignVertical: 'center',
         fontWeight: 'bold',
-        fontSize: 18
+        fontSize: 18,
+    },
+    bluetoothDeviceEntry: {
+        backgroundColor: '#d1c8b0',
+        padding: 10
     },
     clearButton: {
         justifyContent: 'center',
@@ -99,13 +122,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#962CA8',
         width: 60
     },
-    dataEntry: {
-        borderWidth: 3,
-        margin: 1
-    },
-    dataEntryText: {
-        marginLeft: 60
-    }
 });
 
-export default GPSScreen;
+export default BluetoothScreen;

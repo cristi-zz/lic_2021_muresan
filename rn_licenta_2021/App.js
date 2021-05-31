@@ -7,18 +7,7 @@ import MainNavigation from './navigator/MainNavigator'
 
 export default function App() {
   return (
-      //<Navigator />
       <MainNavigation />
   );
 }
 
-
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

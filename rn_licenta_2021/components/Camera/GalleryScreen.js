@@ -5,40 +5,24 @@ import { Ionicons } from '@expo/vector-icons';
 import CustomHeaderButton from '../HeaderButton';
 import { PickerItem } from 'react-native/Libraries/Components/Picker/Picker';
 import { Camera } from 'expo-camera';
-import { NavigationActions } from 'react-navigation';
 
 
-const CameraScreen = props => {
+const GalleryScreen = props => {
 
     return (
         <View>
-            <View style={styles.functionalityContainer}>
-                <Pressable style={styles.cameraButton} onPress={() => {}} >
-                    <Text style={styles.titleText}>Open camera</Text>
-                </Pressable>
-                <Pressable style={styles.cameraButton} onPress={() => {}} >
-                    <Text style={styles.titleText}>Take photos every 5 seconds</Text>
-                </Pressable>
-
-                <Pressable style={styles.cameraButton} onPress={() => {props.navigation.navigate('Gallery') }} >
-                    <Text style={styles.titleText}>Open gallery</Text>
-                </Pressable>
-            </View>
+            <Text> Haidaaaa</Text>
         </View>
     );
 };
 
-CameraScreen.navigationOptions = (navData) => {
+
+GalleryScreen.navigationOptions = (navData) => {
     return {
-        headerTitle: 'Camera',
+        headerTitle: 'Gallery',
         headerStyle: {
             backgroundColor: '#962CA8'
-        },
-        headerLeft: <HeaderButtons HeaderButtonComponent={CustomHeaderButton} >
-            <Item title="menu" iconName="ios-menu" onPress={() => {
-                navData.navigation.toggleDrawer();
-            }} />
-        </HeaderButtons>
+        }
     };
 };
 
@@ -92,4 +76,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default CameraScreen;
+export default GalleryScreen;

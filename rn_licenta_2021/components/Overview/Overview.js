@@ -20,12 +20,16 @@ const data = [
     {
         name: 'Gyroscope',
         id: 4
+    },
+    {
+        name: 'Bluetooth',
+        id: 5
     }];
 
 
 const renderGridItem = itemData => {
     return (
-        <FunctionalityTile name={itemData.item.name} />
+        <FunctionalityTile name={itemData.item.name} value={itemData.item.value} />
     );
 };
 const Overview = props => {
@@ -35,7 +39,8 @@ const Overview = props => {
         <FlatList keyExtractor={(item, index) => item.id}
             data={data}
             renderItem={renderGridItem}
-            numColumns={2} />
+            numColumns={2} 
+        />
         //</View>
     );
 };
@@ -46,8 +51,9 @@ Overview.navigationOptions = (navData) => {
     const onPressSignOut = () => {
         navData.navigation.navigate({routeName:"Login"});
     };
+
     return {
-        //headerTitle: 'Overview functionalities',
+        headerTitle: 'Overview functionalities',
         headerStyle: {
             backgroundColor: '#962CA8'
         },
@@ -59,6 +65,7 @@ Overview.navigationOptions = (navData) => {
         headerRight: <HeaderButtons HeaderButtonComponent={CustomHeaderButton} >
             <Item title="signOut" iconName="log-out-outline" onPress={onPressSignOut}/>
         </HeaderButtons>
+
     };
 };
 const styles = StyleSheet.create({
