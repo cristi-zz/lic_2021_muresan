@@ -4,14 +4,15 @@ import { HeaderButtons, Item } from 'react-navigation-header-buttons';
 import { Ionicons } from '@expo/vector-icons';
 import CustomHeaderButton from '../HeaderButton';
 import { PickerItem } from 'react-native/Libraries/Components/Picker/Picker';
-import { Camera } from 'expo-camera';
+import { isRequired } from 'react-native/Libraries/DeprecatedPropTypes/DeprecatedColorPropType';
 
 
 const GalleryScreen = props => {
+    let uri = props.uri;
 
     return (
-        <View>
-            <Text> Haidaaaa</Text>
+        <View style={styles.imageContainer}>
+            <Image source={{uri: uri}} style={styles.image} />
         </View>
     );
 };
@@ -27,52 +28,26 @@ GalleryScreen.navigationOptions = (navData) => {
 };
 
 const styles = StyleSheet.create({
-    screen: {
+    image: {
+        width: 200,
+        height: 200,
+        flex: 1,
+        alignSelf: 'center'
+    },
+    imageContainer: {
+        margin: 15,
+        borderWidth: 2,
+        flex: 0.6,
         justifyContent: 'center',
-        textAlignVertical: 'center',
-        textAlign: 'center',
-        backgroundColor: '#d1c8b0',
-        margin: 20,
-        height: 200
+        //alignItems: 'center'
+        //padding: 15
     },
-    container: {
-        flex: 1,
-    },
-    camera: {
-        flex: 1,
-    },
-    buttonContainer: {
-        flex: 1,
-        backgroundColor: 'transparent',
+    photoOption: {
         flexDirection: 'row',
-        margin: 20,
+        backgroundColor: '#3F855B'
     },
-    button: {
-        //flex: 0.1,
-        alignSelf: 'flex-end',
-        alignItems: 'center',
-    },
-    text: {
-        fontSize: 18,
-        color: 'white',
-    },
-    cameraButton: {
-        backgroundColor: '#70db9b',
-        margin: 20,
-        borderRadius: 10,
-        alignItems: 'center',
-        //flex: 1,
-        padding: 15
-    },
-    titleText: {
-        textAlign: 'center',
-        textAlignVertical: 'center',
-        fontWeight: 'bold',
-        fontSize: 18,
-    },
-    functionalityContainer: {
-        flexDirection: 'column',
-        marginTop: 30
+    deleteButton: {
+        fontSize: 24
     }
 });
 

@@ -1,29 +1,81 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Button, TouchableOpacity, Pressable, Image } from 'react-native';
+import { View, Text, StyleSheet, Button, TouchableOpacity, Pressable, Image, Modal, Alert, ScrollView } from 'react-native';
 import { HeaderButtons, Item } from 'react-navigation-header-buttons';
-import { Ionicons } from '@expo/vector-icons';
 import CustomHeaderButton from '../HeaderButton';
 import { PickerItem } from 'react-native/Libraries/Components/Picker/Picker';
-import { Camera } from 'expo-camera';
 import { NavigationActions } from 'react-navigation';
-
+import { RNCamera } from 'react-native-camera';
+import { v4 as uuidv4 } from 'uuid';
+import GalleryScreen from './GalleryScreen';
+import RNFetchBlob from 'react-native-fetch-blob';
+import Icon from 'react-native-ionicons';
 
 const CameraScreen = props => {
+    const [cameraMode, setCameraMode] = useState(false);
+    const [galleryMode, setGalleryMode] = useState(false);
+    const [imageArray, setImageArray] = useState([]);
+    const addPhoto = (data) => {
+        setImageArray(currentImages => [...currentImages, { key: uuidv4(), value: data.uri }])
+    }
+
+    let camera;
+
+    const takePicture = async () => {
+        if (camera) {
+            const data = await camera.takePictureAsync();
+            alert('Success!');
+            addPhoto(data);
+            console.log(imageArray);
+        }
+    };
+
 
     return (
         <View>
             <View style={styles.functionalityContainer}>
-                <Pressable style={styles.cameraButton} onPress={() => {}} >
+                <Pressable style={styles.cameraButton} onPress={() => { setCameraMode(true) }} >
                     <Text style={styles.titleText}>Open camera</Text>
                 </Pressable>
-                <Pressable style={styles.cameraButton} onPress={() => {}} >
+                <Pressable style={styles.cameraButton} onPress={() => { }} >
                     <Text style={styles.titleText}>Take photos every 5 seconds</Text>
                 </Pressable>
 
-                <Pressable style={styles.cameraButton} onPress={() => {props.navigation.navigate('Gallery') }} >
+                <Pressable style={styles.cameraButton} onPress={() => { setGalleryMode(true) }} >
                     <Text style={styles.titleText}>Open gallery</Text>
                 </Pressable>
             </View>
+            <Modal visible={cameraMode}>
+                <View style={styles.containerCamera}>
+                    <RNCamera ref={(ref) => { camera = ref; }}
+                        style={{ flex: 1, alignItems: 'center' }}
+                    />
+                    <Button title="Take photo" color='#70db9b' onPress={takePicture} />
+                    <Button title="Close" color='#70db9b' onPress={() => { setCameraMode(false) }} />
+                </View>
+            </Modal>
+            <Modal visible={galleryMode}>
+                <Button color={'#962CA8'} title={"Go back"} onPress={() => setGalleryMode(false)} />
+                <ScrollView>
+                    {imageArray.map((image) => {
+                        return (
+                            <View>
+                                <GalleryScreen uri={image.value} key={image.key} />
+                                <Button raised={true} title={"Delete"} color={'#70db9b'} onPress={() => {
+                                    const newArray = imageArray.filter((item) => item.key !== image.key);
+                                    setImageArray(newArray);
+                                    var path = image.value.split("///").pop();
+                                    RNFetchBlob.fs
+                                        .unlink(path)
+                                        .then(() => { alert("Image deleted!")})
+                                        .catch(err => {
+                                            alert(err);
+                                        });
+                                }} />
+                            </View>);
+                    })}
+                </ScrollView>
+
+            </Modal>
         </View>
     );
 };
@@ -89,6 +141,11 @@ const styles = StyleSheet.create({
     functionalityContainer: {
         flexDirection: 'column',
         marginTop: 30
+    },
+    containerCamera: {
+        flex: 1,
+        flexDirection: 'column',
+        backgroundColor: 'black'
     }
 });
 
