@@ -1,34 +1,84 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, Button, Pressable, TouchableHighlight, Switch, TouchableOpacity, Dimensions, ScrollView } from 'react-native';
 import { HeaderButtons, Item } from 'react-navigation-header-buttons';
 import CustomHeaderButton from '../HeaderButton';
 import { getPixelSizeForLayoutSize } from 'react-native/Libraries/Utilities/PixelRatio';
 import DataEntry from '../Data/DataEntry'
 import GPSDataEntry from './GPSDataEntry'
+import RNLocation from 'react-native-location';
 
 let color1 = '#3F855B';
-let color2 = '#7efcb1';
-let color3 = '#a83a32';
-let color4 = '#ab1f15';
+let color2 = '#a83a32';
+
+//distanceFilter - distanta minima in metrii intre vechea locatie si noua locatie pentru a se updata
+RNLocation.configure({
+    distanceFilter: 0
+})
 
 const GPSScreen = props => {
+    const [color, setColor] = useState(color1);
+    const [buttonText, setButtonText] = useState("Enable location");
+    const [latitude, setLatitude] = useState(0);
+    const [longitude, setLongitude] = useState(0);
+
+    let location;
+    const permissionHandler = async () => {
+
+        let permission = await RNLocation.checkPermission({
+            android: {
+                detail: 'fine'
+            }
+        });
+
+        console.log(permission);
+        if (!permission) {
+            permission = await RNLocation.requestPermission({
+                android: {
+                    detail: 'fine',
+                    rationale: {
+                        title: 'Aplicatia are nevoie de access la locatia dumneavoastra.',
+                        message: 'Folosim locatia pentru afisarea coordonatelor.',
+                        buttonPositive: 'OK',
+                        buttonNegative: 'Cancel'
+                    }
+                }
+            });
+
+            console.log(permission);
+
+        }
+        
+        location = RNLocation.getLatestLocation({ timeout: 100 });
+        setLatitude(location.latitude);
+        setLongitude(location.longitude);
+        console.log(location);
+
+    }
+
     const onPressTurnOn = () => {
         console.log("Merge turn on!");
-    };
-    const onPressTurnOff = () => {
-        console.log("Merge turn off!");
+        if (color === color1) {
+            setColor(color2);
+            setButtonText("Disable location");
+        }
+        else {
+            setColor(color1);
+            setButtonText("Enable location");
+        }
+        permissionHandler();
+
+
+
     };
     return (
         <View>
             <View style={styles.viewButton}>
-                <Pressable onPress={onPressTurnOn} style={({ pressed }) => [{ backgroundColor: pressed ? color2 : color1 }, styles.activateButton]}>
-                    <Text style={styles.text}>Turn On</Text>
-                </Pressable>
-                <Pressable onPress={onPressTurnOff} style={({ pressed }) => [{ backgroundColor: pressed ? color3 : color4 }, styles.activateButton]}>
-                    <Text style={styles.text}>Turn Off</Text>
+                <Pressable onPress={onPressTurnOn} style={({ pressed }) => [{ backgroundColor: color }, styles.activateButton]}>
+                    <Text style={styles.text}>{buttonText}</Text>
+                    {/* //pressed ? color2 : color1 */}
                 </Pressable>
             </View>
-            <GPSDataEntry />
+            <GPSDataEntry latitude={latitude} longitude={longitude} />
         </View>
     );
 };

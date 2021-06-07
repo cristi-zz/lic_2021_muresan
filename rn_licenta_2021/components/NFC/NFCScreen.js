@@ -4,25 +4,63 @@ import { HeaderButtons, Item } from 'react-navigation-header-buttons';
 import CustomHeaderButton from '../HeaderButton';
 import { getPixelSizeForLayoutSize } from 'react-native/Libraries/Utilities/PixelRatio';
 import DataEntry from '../Data/DataEntry'
-
+import NfcManager, {NfcEvents} from 'react-native-nfc-manager';
 
 let color1 = '#3F855B';
-let color2 = '#7efcb1';
-let color3 = '#a83a32';
-let color4 = '#ab1f15';
+let color2 = '#a83a32';
 
 
 const NFCScreen = props => {
     const [nfcReadings, setNFCReading] = useState([]);
+    const [color, setColor] = useState(color1);
+    const [buttonText, setButtonText] = useState("Enable NFC")
     const toggleSwitch = () => setIsEnabled(previousState => !previousState);
 
-    const onPressTurnOn = () => {
-        console.log("Merge turn on!");
+    const initNFC = () => {
+        NfcManager.start();
     };
 
-    const onPressTurnOff = () => {
-        console.log("Merge turn off!");
+    const readNFC = () => {
+        const cleanUp = () => {
+            NfcManager.setEventListener(NfcEvents.DiscoverTag, null);
+            NfcManager.setEventListener(NfcEvents.SessionClosed, null);
+          };
+
+        return new Promise((resolve) => {
+            let tagFound = null;
+
+            NfcManager.setEventListener(NfcEvents.DiscoverTag, (tag) => {
+                tagFound = tag;
+                console.log(tagFound);
+                resolve(tag);
+                NfcManager.setAlertMessage('NFC card found!');
+                NfcManager.unregisterTagEvent().catch(() => 0);
+            });
+
+            NfcManager.setEventListener(NfcEvents.SessionClosed, () => {
+                cleanUp();
+                if (!tagFound) {
+                  resolve();
+                }
+              });
+
+              NfcManager.registerTagEvent();
+        });
+    }
+    const onPressTurnOn = () => {
+        console.log("Merge turn on!");
+        if(color === color1){
+            setColor(color2);
+            setButtonText("Disable NFC");
+        }
+        else {
+            setColor(color1);
+            setButtonText("Enable NFC");
+        }
+        initNFC();
+        readNFC();
     };
+
 
     let date = new Date().getDate(); //To get the Current Date
     let month = new Date().getMonth() + 1; //To get the Current Month
@@ -41,11 +79,9 @@ const NFCScreen = props => {
     return (
         <View>
             <View style={styles.viewButton}>
-                <Pressable onPress={onPressTurnOn} style={({ pressed }) => [{ backgroundColor: pressed ? color2 : color1 }, styles.activateButton]}>
-                    <Text style={styles.text}>Turn On</Text>
-                </Pressable>
-                <Pressable onPress={onPressTurnOff} style={({ pressed }) => [{ backgroundColor: pressed ? color3 : color4 }, styles.activateButton]}>
-                    <Text style={styles.text}>Turn Off</Text>
+                <Pressable onPress={onPressTurnOn} style={({ pressed }) => [{ backgroundColor: color }, styles.activateButton]}> 
+                    <Text style={styles.text}>{buttonText}</Text>
+                    {/* //pressed ? color2 : color1 */}
                 </Pressable>
             </View>
             <TouchableOpacity onPress={addNFCReading} style={styles.dataTitle}>

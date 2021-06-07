@@ -1,25 +1,63 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Button, Pressable, Dimensions, ScrollView} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Button, Pressable, Dimensions, ScrollView } from 'react-native';
 import { HeaderButtons, Item } from 'react-navigation-header-buttons';
 import { Ionicons } from '@expo/vector-icons';
 import CustomHeaderButton from '../HeaderButton';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import { BleManager } from 'react-native-ble-plx';
 
 
 let color1 = '#3F855B';
-let color2 = '#7efcb1';
-let color3 = '#a83a32';
-let color4 = '#ab1f15';
+let color2 = '#a83a32';
+
+export const manager = new BleManager();
 
 const BluetoothScreen = props => {
+    const [color, setColor] = useState(color1);
+    const [buttonText, setButtonText] = useState("Enable bluetooth")
+    const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+    const [blueDevices, setBlueDevice] = useState([]);
+
+
     const onPressTurnOn = () => {
         console.log("Merge turn on!");
+        if (color === color1) {
+            setColor(color2);
+            setButtonText("Disable bluetooth");
+        }
+        else {
+            setColor(color1);
+            setButtonText("Enable bluetooth");
+        }
+        if (color === color2) {
+            manager.stopDeviceScan();
+        }
+        else {
+            manager.startDeviceScan(null, null, (error, device) => {
+                if (error) {
+                    // Handle error (scanning will be stopped automatically)
+                    console.log(error);
+                    return
+                }
+                console.log(device);
+                // Check if it is a device you are looking for based on advertisement data
+                // or other criteria.
+                if (device) {
+                    setBlueDevice(currentDevices => [...currentDevices, device.name])
+                }
+                else {
+                    // Stop scanning as it's not necessary if you are scanning for one device.
+                    console.log("Nu gasim nimic");
+                    manager.stopDeviceScan();
+                    console.log("Nu gasim nimic");
+
+                    // Proceed with connection.
+                }
+            });
+        }
+
     };
 
-    const onPressTurnOff = () => {
-        console.log("Merge turn off!");
-    };
-    const [blueDevices, setBlueDevice] = useState([]);
 
     const addBlueDevice = () => {
         setBlueDevice(currentDevices => [...currentDevices, "blana"]);
@@ -31,11 +69,9 @@ const BluetoothScreen = props => {
     return (
         <View>
             <View style={styles.viewButton}>
-                <Pressable onPress={onPressTurnOn} style={({ pressed }) => [{ backgroundColor: pressed ? color2 : color1 }, styles.activateButton]}>
-                    <Text style={styles.text}>Turn On</Text>
-                </Pressable>
-                <Pressable onPress={onPressTurnOff} style={({ pressed }) => [{ backgroundColor: pressed ? color3 : color4 }, styles.activateButton]}>
-                    <Text style={styles.text}>Turn Off</Text>
+                <Pressable onPress={onPressTurnOn} style={({ pressed }) => [{ backgroundColor: color }, styles.activateButton]}>
+                    <Text style={styles.text}>{buttonText}</Text>
+                    {/* //pressed ? color2 : color1 */}
                 </Pressable>
             </View>
             <TouchableOpacity onPress={addBlueDevice} style={styles.bluetoothContainer}>
@@ -45,7 +81,7 @@ const BluetoothScreen = props => {
                 </Pressable>
             </TouchableOpacity>
             <ScrollView>
-                {blueDevices.map((blueDevice) => {return (<View style={styles.bluetoothDeviceEntry}><Text>{blueDevice}</Text></View>);})}
+                {blueDevices.map((blueDevice) => { return (<View style={styles.bluetoothDeviceEntry}><Text>{blueDevice}</Text></View>); })}
             </ScrollView>
         </View>
     );

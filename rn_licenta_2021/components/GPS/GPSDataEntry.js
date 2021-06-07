@@ -8,8 +8,8 @@ const GPSDataEntry = props => {
     return (
         <View style={styles.dataEntry}>
             <Text>Hai sa o facem si pe asta</Text>
-            <Text> Longitudine: 2419451</Text>
-            <Text>Latitudine: 532542852</Text>
+            <Text> Longitudine: {props.longitude}</Text>
+            <Text> Latitudine: {props.latitude}</Text>
         </View>
     );
 

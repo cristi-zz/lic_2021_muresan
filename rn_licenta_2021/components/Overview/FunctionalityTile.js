@@ -2,24 +2,30 @@ import React, { useState } from 'react';
 import { TouchableOpacity, View, Text, StyleSheet, Switch } from 'react-native';
 
 const FunctionalityTile = props => {
+    const color1 = '#3F855B';
+    const color2 = '#a83a32';
     const [isEnabled, setIsEnabled] = useState(false);
+    const [active, setActive] = useState("Active");
+    const [color, setColor] = useState(color1);
     const toggleSwitch = () => setIsEnabled(previousState => !previousState);
 
+    const onPressColor = () => {
+        if (active === "Active") {
+            setActive("Not active");
+            setColor(color2);
+        }
+        else {
+            setActive("Active");
+            setColor(color1);
+        }
+    };
     return (
-        <TouchableOpacity style={styles.gridItem}>
-            <View style={styles.tile}>
+        <TouchableOpacity style={styles.gridItem} onPress={onPressColor}>
+            <View style={[styles.tile, {backgroundColor: color}]}>
                 <Text style={styles.textTitle}>{props.name}</Text>
 
                 <View style={styles.container}>
-                    <Text>OFF</Text>
-                    <Switch
-                        trackColor={{ false: "#767577", true: "#81b0ff" }}
-                        thumbColor={isEnabled ? "#962CA8" : "#f4f3f4"}
-                        ios_backgroundColor="#3e3e3e"
-                        onValueChange={toggleSwitch}
-                        value={isEnabled}
-                    />
-                    <Text>ON</Text>
+                    <Text style={styles.activeText}>{active}</Text>
                 </View>
             </View>
         </TouchableOpacity>
@@ -38,7 +44,7 @@ const styles = StyleSheet.create({
     },
     tile: {
         flex: 1,
-        backgroundColor: '#70db9b',
+        backgroundColor: 'green',
         borderRadius: 20,
         shadowColor: 'black',
         shadowOpacity: 0.2,
@@ -51,11 +57,17 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "space-evenly",
         flexDirection: 'row',
-        
+
     },
     textTitle: {
         textAlign: 'center',
-        fontWeight: 'bold'
+        fontWeight: 'bold',
+        color: 'white'
+    },
+    activeText: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: 'white'
     }
 });
 

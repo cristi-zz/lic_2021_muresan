@@ -1,48 +1,86 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Button, Pressable, TouchableHighlight, Switch, TouchableOpacity, Dimensions, ScrollView } from 'react-native';
 import { HeaderButtons, Item } from 'react-navigation-header-buttons';
 import CustomHeaderButton from '../HeaderButton';
 import { getPixelSizeForLayoutSize } from 'react-native/Libraries/Utilities/PixelRatio';
-import DataEntry from '../Data/DataEntry'
-
+import DataEntry from '../Data/DataEntry';
+import { accelerometer, setUpdateIntervalForType, SensorTypes } from 'react-native-sensors';
+import { Gyroscope } from 'expo-sensors';
 
 let color1 = '#3F855B';
-let color2 = '#7efcb1';
-let color3 = '#a83a32';
-let color4 = '#ab1f15';
+let color2 = '#a83a32';
+
 
 
 const GyroscopeScreen = props => {
+    const [isEnabled, setIsEnabled] = useState(false);
+    const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+    const [data, setData] = useState({
+        x: 0,
+        y: 0,
+        z: 0,
+      });
+      const [subscription, setSubscription] = useState(null);
+    
+      const _slow = () => {
+        Gyroscope.setUpdateInterval(1000);
+      };
+    
+      const _fast = () => {
+        Gyroscope.setUpdateInterval(400);
+      };
+    
+      const _subscribe = () => {
+        setSubscription(
+          Gyroscope.addListener(gyroscopeData => {
+            setData(gyroscopeData);
+          })
+        );
+      };
+    
+      const _unsubscribe = () => {
+        subscription && subscription.remove();
+        setSubscription(null);
+      };
+
+      const { x, y, z } = data;
+
     const onPressTurnOn = () => {
         console.log("Merge turn on!");
-    };
+        toggleSwitch();
+        _fast;
+        // subscription ? _unsubscribe : _subscribe;
+        // console.log(subscription);
+        if(isEnabled){
+            _subscribe();
+        }
+        else{
+            _unsubscribe();
+            Gyroscope.removeAllListeners();
+        }
 
-    const onPressTurnOff = () => {
-        console.log("Merge turn off!");
-    };
 
+    };
     return (
         <View>
             <View style={styles.viewButton}>
-                <Pressable onPress={onPressTurnOn} style={({ pressed }) => [{ backgroundColor: pressed ? color2 : color1 }, styles.activateButton]}>
-                    <Text style={styles.text}>Turn On</Text>
-                </Pressable>
-                <Pressable onPress={onPressTurnOff} style={({ pressed }) => [{ backgroundColor: pressed ? color3 : color4 }, styles.activateButton]}>
-                    <Text style={styles.text}>Turn Off</Text>
+                <Pressable onPress={onPressTurnOn} style={({ pressed }) => [{ backgroundColor: subscription ? color2 : color1 }, styles.activateButton]}>
+                    <Text style={styles.text}>{subscription ? 'Stop reading values' : 'Read sensor values'}</Text>
+                    {/* //pressed ? color2 : color1 */}
                 </Pressable>
             </View>
             <View style={styles.axisContainer}>
                 <View style={styles.axisTile}>
                     <Text style={styles.dataTitleText}>X - Axis</Text>
-                    <Text style={styles.axisValue}> 451461741 </Text>
+                    <Text style={styles.axisValue}> {x} </Text>
                 </View>
                 <View style={styles.axisTile}>
                     <Text style={styles.dataTitleText}>Y - Axis</Text>
-                    <Text style={styles.axisValue}> 451461741 </Text>
+                    <Text style={styles.axisValue}> {y} </Text>
                 </View>
                 <View style={styles.axisTile}>
                     <Text style={styles.dataTitleText}>Z - Axis</Text>
-                    <Text style={styles.axisValue}> 451461741 </Text>
+                    <Text style={styles.axisValue}> {z}</Text>
                 </View>
             </View>
         </View>
