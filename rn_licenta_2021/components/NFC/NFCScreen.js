@@ -1,21 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, Text, StyleSheet, Button, Pressable, TouchableHighlight, Switch, TouchableOpacity, Dimensions, ScrollView } from 'react-native';
 import { HeaderButtons, Item } from 'react-navigation-header-buttons';
 import CustomHeaderButton from '../HeaderButton';
 import { getPixelSizeForLayoutSize } from 'react-native/Libraries/Utilities/PixelRatio';
 import DataEntry from '../Data/DataEntry'
-import NfcManager, {NfcEvents} from 'react-native-nfc-manager';
+import NfcManager, { NfcEvents } from 'react-native-nfc-manager';
+import firebase from '../../firebase/firebase_config';
+import {OverviewContext, OverviewContextSetter} from '../Overview/Context';
 
 let color1 = '#3F855B';
 let color2 = '#a83a32';
 
 
+
 const NFCScreen = props => {
     const [nfcReadings, setNFCReading] = useState([]);
     const [color, setColor] = useState(color1);
+    const [test, setTest] = useState("");
     const [buttonText, setButtonText] = useState("Enable NFC")
     const toggleSwitch = () => setIsEnabled(previousState => !previousState);
-
+    const overview = firebase.firestore().collection('overview');
     const initNFC = () => {
         NfcManager.start();
     };
@@ -24,7 +28,7 @@ const NFCScreen = props => {
         const cleanUp = () => {
             NfcManager.setEventListener(NfcEvents.DiscoverTag, null);
             NfcManager.setEventListener(NfcEvents.SessionClosed, null);
-          };
+        };
 
         return new Promise((resolve) => {
             let tagFound = null;
@@ -32,6 +36,7 @@ const NFCScreen = props => {
             NfcManager.setEventListener(NfcEvents.DiscoverTag, (tag) => {
                 tagFound = tag;
                 console.log(tagFound);
+                setTest(tagFound);
                 resolve(tag);
                 NfcManager.setAlertMessage('NFC card found!');
                 NfcManager.unregisterTagEvent().catch(() => 0);
@@ -40,22 +45,29 @@ const NFCScreen = props => {
             NfcManager.setEventListener(NfcEvents.SessionClosed, () => {
                 cleanUp();
                 if (!tagFound) {
-                  resolve();
+                    resolve();
                 }
-              });
+            });
 
-              NfcManager.registerTagEvent();
+            NfcManager.registerTagEvent();
         });
     }
+    const state = useContext(OverviewContext);
+    const setNFCState = useContext(OverviewContextSetter);
     const onPressTurnOn = () => {
+        let items = {...state};
         console.log("Merge turn on!");
-        if(color === color1){
+        if (color === color1) {
             setColor(color2);
             setButtonText("Disable NFC");
+            items.nfc = true;
+            setNFCState(items);
         }
         else {
             setColor(color1);
             setButtonText("Enable NFC");
+            items.nfc = false;
+            setNFCState(items);
         }
         initNFC();
         readNFC();
@@ -79,10 +91,10 @@ const NFCScreen = props => {
     return (
         <View>
             <View style={styles.viewButton}>
-                <Pressable onPress={onPressTurnOn} style={({ pressed }) => [{ backgroundColor: color }, styles.activateButton]}> 
-                    <Text style={styles.text}>{buttonText}</Text>
-                    {/* //pressed ? color2 : color1 */}
-                </Pressable>
+                    <Pressable onPress={onPressTurnOn} style={({ pressed }) => [{ backgroundColor: color }, styles.activateButton]}>
+                        <Text style={styles.text}>{buttonText}</Text>
+                        {/* //pressed ? color2 : color1 */}
+                    </Pressable>
             </View>
             <TouchableOpacity onPress={addNFCReading} style={styles.dataTitle}>
                 <Text style={styles.dataTitleText}> NFC Readings</Text>
@@ -91,8 +103,9 @@ const NFCScreen = props => {
                 </Pressable>
             </TouchableOpacity>
             <ScrollView>
-                {nfcReadings.map((nfc) => {return (<View style={styles.dataEntry}><Text style={styles.dataEntryText}>{nfc}</Text></View>);})}
+                {nfcReadings.map((nfc) => { return (<View style={styles.dataEntry}><Text style={styles.dataEntryText}>{nfc}</Text></View>); })}
             </ScrollView>
+            <Text>{test}</Text>
         </View>
 
 

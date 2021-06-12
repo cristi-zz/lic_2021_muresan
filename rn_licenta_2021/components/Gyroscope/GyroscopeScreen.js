@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, Button, Pressable, TouchableHighlight, Switch, TouchableOpacity, Dimensions, ScrollView } from 'react-native';
 import { HeaderButtons, Item } from 'react-navigation-header-buttons';
 import CustomHeaderButton from '../HeaderButton';
@@ -6,6 +6,7 @@ import { getPixelSizeForLayoutSize } from 'react-native/Libraries/Utilities/Pixe
 import DataEntry from '../Data/DataEntry';
 import { accelerometer, setUpdateIntervalForType, SensorTypes } from 'react-native-sensors';
 import { Gyroscope } from 'expo-sensors';
+import {OverviewContext, OverviewContextSetter} from '../Overview/Context';
 
 let color1 = '#3F855B';
 let color2 = '#a83a32';
@@ -15,6 +16,9 @@ let color2 = '#a83a32';
 const GyroscopeScreen = props => {
     const [isEnabled, setIsEnabled] = useState(false);
     const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+    const state = useContext(OverviewContext);
+    const setState = useContext(OverviewContextSetter);
+
     const [data, setData] = useState({
         x: 0,
         y: 0,
@@ -48,15 +52,20 @@ const GyroscopeScreen = props => {
     const onPressTurnOn = () => {
         console.log("Merge turn on!");
         toggleSwitch();
+        let items = {...state};
         _fast;
         // subscription ? _unsubscribe : _subscribe;
         // console.log(subscription);
         if(isEnabled){
             _subscribe();
+            items.gyroscope = true;
+            setState(items);
         }
         else{
             _unsubscribe();
             Gyroscope.removeAllListeners();
+            items.gyroscope = false;
+            setState(items);
         }
 
 

@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, Button, Pressable, Dimensions, ScrollView } from 'react-native';
 import { HeaderButtons, Item } from 'react-navigation-header-buttons';
 import { Ionicons } from '@expo/vector-icons';
 import CustomHeaderButton from '../HeaderButton';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { BleManager } from 'react-native-ble-plx';
+import {OverviewContext, OverviewContextSetter} from '../Overview/Context';
 
 
 let color1 = '#3F855B';
@@ -17,17 +18,24 @@ const BluetoothScreen = props => {
     const [buttonText, setButtonText] = useState("Enable bluetooth")
     const toggleSwitch = () => setIsEnabled(previousState => !previousState);
     const [blueDevices, setBlueDevice] = useState([]);
-
+    const state = useContext(OverviewContext);
+    const setState = useContext(OverviewContextSetter);
 
     const onPressTurnOn = () => {
+
         console.log("Merge turn on!");
+        let items = {...state};
         if (color === color1) {
             setColor(color2);
             setButtonText("Disable bluetooth");
+            items.bluetooth = true;
+            setState(items);
         }
         else {
             setColor(color1);
             setButtonText("Enable bluetooth");
+            items.bluetooth = false;
+            setState(items);
         }
         if (color === color2) {
             manager.stopDeviceScan();
@@ -55,7 +63,6 @@ const BluetoothScreen = props => {
                 }
             });
         }
-
     };
 
 

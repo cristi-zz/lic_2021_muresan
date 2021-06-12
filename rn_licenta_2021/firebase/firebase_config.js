@@ -16,5 +16,19 @@ const firebaseConfig = {
   if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
     }
+  
+   export const database = firebase.firestore();
+    // useEffect(()=>{
+    //     const unsubscribe = database.collection('overview').onSnapshot(snap => {
+    //         const data = snap.docs.map(doc => doc.data())
+    //         setDatabaseData(data)
+    //       });
+
+    //       //remember to unsubscribe from your realtime listener on unmount or you will create a memory leak
+    //       return () => unsubscribe()
+    // },[]);
+    // const data = database.collection('overview').doc('func').get().then(doc => {
+    //     setDatabaseData(doc.data());
+    // });
 
 export default firebase;

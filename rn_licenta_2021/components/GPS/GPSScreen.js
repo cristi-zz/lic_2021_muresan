@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, Text, StyleSheet, Button, Pressable, TouchableHighlight, Switch, TouchableOpacity, Dimensions, ScrollView } from 'react-native';
 import { HeaderButtons, Item } from 'react-navigation-header-buttons';
 import CustomHeaderButton from '../HeaderButton';
@@ -6,6 +6,7 @@ import { getPixelSizeForLayoutSize } from 'react-native/Libraries/Utilities/Pixe
 import DataEntry from '../Data/DataEntry'
 import GPSDataEntry from './GPSDataEntry'
 import RNLocation from 'react-native-location';
+import {OverviewContext, OverviewContextSetter} from '../Overview/Context';
 
 let color1 = '#3F855B';
 let color2 = '#a83a32';
@@ -20,6 +21,8 @@ const GPSScreen = props => {
     const [buttonText, setButtonText] = useState("Enable location");
     const [latitude, setLatitude] = useState(0);
     const [longitude, setLongitude] = useState(0);
+    const state = useContext(OverviewContext);
+    const setState = useContext(OverviewContextSetter);
 
     let location;
     const permissionHandler = async () => {
@@ -57,13 +60,18 @@ const GPSScreen = props => {
 
     const onPressTurnOn = () => {
         console.log("Merge turn on!");
+        let items = {...state};
         if (color === color1) {
             setColor(color2);
             setButtonText("Disable location");
+            items.gps = true;
+            setState(items);
         }
         else {
             setColor(color1);
             setButtonText("Enable location");
+            items.gps = false;
+            setState(items);
         }
         permissionHandler();
 

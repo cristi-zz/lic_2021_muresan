@@ -1,31 +1,20 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { TouchableOpacity, View, Text, StyleSheet, Switch } from 'react-native';
 
+
 const FunctionalityTile = props => {
-    const color1 = '#3F855B';
-    const color2 = '#a83a32';
-    const [isEnabled, setIsEnabled] = useState(false);
-    const [active, setActive] = useState("Active");
-    const [color, setColor] = useState(color1);
-    const toggleSwitch = () => setIsEnabled(previousState => !previousState);
 
     const onPressColor = () => {
-        if (active === "Active") {
-            setActive("Not active");
-            setColor(color2);
-        }
-        else {
-            setActive("Active");
-            setColor(color1);
-        }
+        console.log("Am apasat!")
     };
+
     return (
         <TouchableOpacity style={styles.gridItem} onPress={onPressColor}>
-            <View style={[styles.tile, {backgroundColor: color}]}>
+            <View style={[styles.tile, {backgroundColor: props.color}]}>
                 <Text style={styles.textTitle}>{props.name}</Text>
 
                 <View style={styles.container}>
-                    <Text style={styles.activeText}>{active}</Text>
+                    <Text style={styles.activeText}>{props.value}</Text>
                 </View>
             </View>
         </TouchableOpacity>
