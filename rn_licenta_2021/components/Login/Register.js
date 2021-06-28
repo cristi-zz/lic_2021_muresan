@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Button, TextInput, TouchableOpacity, ToastAndroid } from 'react-native';
 import firebase from '../../firebase/firebase_config';
+import {COLORS} from '../Colors/Colors';
 
 
 const RegisterScreen = props => {
@@ -39,7 +40,7 @@ RegisterScreen.navigationOptions = (navData) => {
     return {
         headerTitle: 'Register',
         headerStyle: {
-            backgroundColor: '#962CA8'
+            backgroundColor: COLORS.appBar
         }
     };
 };
@@ -64,7 +65,7 @@ const styles = StyleSheet.create({
         margin: 5
 
     }, button: {
-        backgroundColor: '#3F855B',
+        backgroundColor: COLORS.enableButton,
         marginTop: 20,
         height: 48,
         width: 200,

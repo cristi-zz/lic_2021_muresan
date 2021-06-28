@@ -1,6 +1,9 @@
 # ReactNative
 node_modules/
 .expo/
+assets/
+android/
+.idea/
 .expo-shared/
 .vscode\.react
 __generated__

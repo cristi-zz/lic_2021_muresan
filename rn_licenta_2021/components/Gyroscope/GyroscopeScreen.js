@@ -5,26 +5,33 @@ import CustomHeaderButton from '../HeaderButton';
 import { getPixelSizeForLayoutSize } from 'react-native/Libraries/Utilities/PixelRatio';
 import DataEntry from '../Data/DataEntry';
 import { accelerometer, setUpdateIntervalForType, SensorTypes } from 'react-native-sensors';
-import { Gyroscope } from 'expo-sensors';
+import { Gyroscope, Accelerometer } from 'expo-sensors';
 import {OverviewContext, OverviewContextSetter} from '../Overview/Context';
+import {COLORS} from '../Colors/Colors';
 
-let color1 = '#3F855B';
-let color2 = '#a83a32';
+let color1 = COLORS.enableButton;
+let color2 = COLORS.disableButton;
 
 
 
 const GyroscopeScreen = props => {
     const [isEnabled, setIsEnabled] = useState(false);
-    const toggleSwitch = () => setIsEnabled(previousState => !previousState);
     const state = useContext(OverviewContext);
     const setState = useContext(OverviewContextSetter);
 
-    const [data, setData] = useState({
+    const [dataGyro, setDataGyro] = useState({
+        x: 0,
+        y: 0,
+        z: 0,
+      });
+
+      const [dataAcc, setDataAcc] = useState({
         x: 0,
         y: 0,
         z: 0,
       });
       const [subscription, setSubscription] = useState(null);
+      const [subscriptionAcc, setSubscriptionAcc] = useState(null);
     
       const _slow = () => {
         Gyroscope.setUpdateInterval(1000);
@@ -32,65 +39,87 @@ const GyroscopeScreen = props => {
     
       const _fast = () => {
         Gyroscope.setUpdateInterval(400);
+        Accelerometer.setUpdateInterval(400);
       };
     
       const _subscribe = () => {
+          console.log('blanaaa');
         setSubscription(
           Gyroscope.addListener(gyroscopeData => {
-            setData(gyroscopeData);
+            setDataGyro(gyroscopeData);
           })
         );
+        setSubscriptionAcc(Accelerometer.addListener(accData => {
+            setDataAcc(accData);
+        }));
       };
     
       const _unsubscribe = () => {
         subscription && subscription.remove();
+        subscriptionAcc && subscriptionAcc.remove();
+        setSubscriptionAcc(null);
         setSubscription(null);
       };
 
-      const { x, y, z } = data;
+      const { xGyro, yGyro, zGyro } = dataGyro;
+      const { xAcc, yAcc, zAcc } = dataAcc;
 
-    const onPressTurnOn = () => {
-        console.log("Merge turn on!");
-        toggleSwitch();
-        let items = {...state};
-        _fast;
-        // subscription ? _unsubscribe : _subscribe;
-        // console.log(subscription);
+    useEffect(()=> {
         if(isEnabled){
+                
             _subscribe();
-            items.gyroscope = true;
-            setState(items);
         }
         else{
+            console.log('else ' + isEnabled);
             _unsubscribe();
             Gyroscope.removeAllListeners();
-            items.gyroscope = false;
-            setState(items);
+            Accelerometer.removeAllListeners();
         }
-
-
+    },[isEnabled]);
+    const onPressTurnOn = () => {
+        console.log("Merge turn on!");
+        _fast;
+        setIsEnabled(previousState => !previousState);
     };
     return (
         <View>
             <View style={styles.viewButton}>
-                <Pressable onPress={onPressTurnOn} style={({ pressed }) => [{ backgroundColor: subscription ? color2 : color1 }, styles.activateButton]}>
-                    <Text style={styles.text}>{subscription ? 'Stop reading values' : 'Read sensor values'}</Text>
+                <Pressable onPress={onPressTurnOn} style={[{backgroundColor: isEnabled?color2:color1},styles.activateButton]}>
+                    <Text style={styles.text}>{isEnabled ? 'Stop reading values' : 'Read sensor values'}</Text>
                     {/* //pressed ? color2 : color1 */}
                 </Pressable>
             </View>
+            <View style={{margin: 10}}>
+            <Text style={styles.titleAcc}>Accelerometer</Text>
             <View style={styles.axisContainer}>
                 <View style={styles.axisTile}>
-                    <Text style={styles.dataTitleText}>X - Axis</Text>
-                    <Text style={styles.axisValue}> {x} </Text>
+                    <Text style={styles.dataTitleText}>X</Text>
+                    <Text style={styles.axisValue}> {(dataAcc.x * 9.81).toFixed(3)} </Text>
                 </View>
                 <View style={styles.axisTile}>
-                    <Text style={styles.dataTitleText}>Y - Axis</Text>
-                    <Text style={styles.axisValue}> {y} </Text>
+                    <Text style={styles.dataTitleText}>Y</Text>
+                    <Text style={styles.axisValue}> {(dataAcc.y * 9.81).toFixed(3)} </Text>
                 </View>
                 <View style={styles.axisTile}>
-                    <Text style={styles.dataTitleText}>Z - Axis</Text>
-                    <Text style={styles.axisValue}> {z}</Text>
+                    <Text style={styles.dataTitleText}>Z</Text>
+                    <Text style={styles.axisValue}> {(dataAcc.z * 9.81).toFixed(3)}</Text>
                 </View>
+            </View>
+            <Text style={styles.titleAcc}>Gyroscope</Text>
+            <View style={styles.axisContainer}>
+                <View style={styles.axisTile}>
+                    <Text style={styles.dataTitleText}>X</Text>
+                    <Text style={styles.axisValue}> {(dataGyro.x).toFixed(3)} </Text>
+                </View>
+                <View style={styles.axisTile}>
+                    <Text style={styles.dataTitleText}>Y</Text>
+                    <Text style={styles.axisValue}> {(dataGyro.y).toFixed(3)} </Text>
+                </View>
+                <View style={styles.axisTile}>
+                    <Text style={styles.dataTitleText}>Z</Text>
+                    <Text style={styles.axisValue}> {(dataGyro.z).toFixed(3)}</Text>
+                </View>
+            </View>
             </View>
         </View>
     );
@@ -100,7 +129,7 @@ GyroscopeScreen.navigationOptions = (navData) => {
     return {
         headerTitle: 'Gyroscope',
         headerStyle: {
-            backgroundColor: '#962CA8'
+            backgroundColor: COLORS.appBar
         },
         headerLeft: <HeaderButtons HeaderButtonComponent={CustomHeaderButton} >
             <Item title="menu" iconName="ios-menu" onPress={() => {
@@ -126,7 +155,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: 32,
         borderRadius: 4,
         elevation: 3,
-        margin: 10
+        margin: 10,
+        //backgroundColor: global.enableButton
     },
     viewButton: {
         justifyContent: 'center',
@@ -144,7 +174,7 @@ const styles = StyleSheet.create({
     dataTitle: {
         width: Dimensions.get('window').width,
         height: 50,
-        backgroundColor: '#3F855B',
+        backgroundColor: COLORS.primaryColor,
         marginTop: 50,
         justifyContent: 'center',
         flexDirection: 'row',
@@ -159,7 +189,7 @@ const styles = StyleSheet.create({
     clearButton: {
         justifyContent: 'center',
         marginLeft: 100,
-        backgroundColor: '#962CA8',
+        backgroundColor: COLORS.enableButton,
         width: 60
     },
     dataEntry: {
@@ -170,12 +200,12 @@ const styles = StyleSheet.create({
         marginLeft: 60
     },
     axisTile: {
-        backgroundColor: '#70db9b',
-        margin: 20,
+        backgroundColor: COLORS.secondaryColor,
+        // margin: 20,
         height: 100,
-        marginTop: 70,
+        //marginTop: 70,
         flex: 1,
-        borderRadius: 20,
+       // borderRadius: 20,
         shadowRadius: 10,
         shadowColor: 'black',
         shadowOffset: {
@@ -183,7 +213,8 @@ const styles = StyleSheet.create({
             height: 10
         },
         shadowRadius: 10,
-        elevation: 10
+        elevation: 10,
+        borderWidth: 1
     },
     axisContainer: {
         flexDirection: 'row'
@@ -191,7 +222,17 @@ const styles = StyleSheet.create({
     axisValue: {
         textAlign: 'center',
         textAlignVertical: 'center',
-        marginTop: 10
+        marginTop: 10,
+        flex: 1
+    },
+    titleAcc:{
+        width: '100%',
+        height: '10%',
+        fontSize: 20,
+        backgroundColor:COLORS.primaryColor,
+        textAlign: 'center',
+        marginTop: 30,
+        color: 'white'
     }
 });
 

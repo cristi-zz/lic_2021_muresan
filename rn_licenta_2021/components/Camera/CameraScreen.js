@@ -9,6 +9,8 @@ import { v4 as uuidv4 } from 'uuid';
 import GalleryScreen from './GalleryScreen';
 import RNFetchBlob from 'react-native-fetch-blob';
 import Icon from 'react-native-ionicons';
+import {COLORS} from '../Colors/Colors';
+
 
 const CameraScreen = props => {
     const [cameraMode, setCameraMode] = useState(false);
@@ -36,9 +38,6 @@ const CameraScreen = props => {
                 <Pressable style={styles.cameraButton} onPress={() => { setCameraMode(true) }} >
                     <Text style={styles.titleText}>Open camera</Text>
                 </Pressable>
-                <Pressable style={styles.cameraButton} onPress={() => { }} >
-                    <Text style={styles.titleText}>Take photos every 5 seconds</Text>
-                </Pressable>
 
                 <Pressable style={styles.cameraButton} onPress={() => { setGalleryMode(true) }} >
                     <Text style={styles.titleText}>Open gallery</Text>
@@ -49,18 +48,18 @@ const CameraScreen = props => {
                     <RNCamera ref={(ref) => { camera = ref; }}
                         style={{ flex: 1, alignItems: 'center' }}
                     />
-                    <Button title="Take photo" color='#70db9b' onPress={takePicture} />
-                    <Button title="Close" color='#70db9b' onPress={() => { setCameraMode(false) }} />
+                    <Button style={styles.test} title="Take photo" color={COLORS.enableButton} onPress={takePicture} />
+                    <Button title="Close" color= {COLORS.disableButton} onPress={() => { setCameraMode(false) }} />
                 </View>
             </Modal>
             <Modal visible={galleryMode}>
-                <Button color={'#962CA8'} title={"Go back"} onPress={() => setGalleryMode(false)} />
+                <Button color={COLORS.enableButton} title={"Go back"} onPress={() => setGalleryMode(false)} />
                 <ScrollView>
                     {imageArray.map((image) => {
                         return (
                             <View>
                                 <GalleryScreen uri={image.value} key={image.key} />
-                                <Button raised={true} title={"Delete"} color={'#70db9b'} onPress={() => {
+                                <Button raised={true} title={"Delete"} color={COLORS.disableButton} onPress={() => {
                                     const newArray = imageArray.filter((item) => item.key !== image.key);
                                     setImageArray(newArray);
                                     var path = image.value.split("///").pop();
@@ -84,7 +83,7 @@ CameraScreen.navigationOptions = (navData) => {
     return {
         headerTitle: 'Camera',
         headerStyle: {
-            backgroundColor: '#962CA8'
+            backgroundColor: COLORS.appBar
         },
         headerLeft: <HeaderButtons HeaderButtonComponent={CustomHeaderButton} >
             <Item title="menu" iconName="ios-menu" onPress={() => {
@@ -125,7 +124,7 @@ const styles = StyleSheet.create({
         color: 'white',
     },
     cameraButton: {
-        backgroundColor: '#70db9b',
+        backgroundColor: COLORS.enableButton,
         margin: 20,
         borderRadius: 10,
         alignItems: 'center',
@@ -146,6 +145,11 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection: 'column',
         backgroundColor: 'black'
+    },
+    test: {
+        position:'absolute',
+        alignContent: 'center',
+        alignSelf: 'center'
     }
 });
 

@@ -1,15 +1,19 @@
-import React, { useState, useContext } from 'react';
-import { View, Text, StyleSheet, Button, Pressable, TouchableHighlight, Switch, TouchableOpacity, Dimensions, ScrollView } from 'react-native';
+import React, { useState, useContext, useCallback, useRef, useMemo } from 'react';
+import { View, Image, Text, StyleSheet, Button, Pressable, TouchableHighlight, Switch, TouchableOpacity, Dimensions, ScrollView } from 'react-native';
 import { HeaderButtons, Item } from 'react-navigation-header-buttons';
 import CustomHeaderButton from '../HeaderButton';
 import { getPixelSizeForLayoutSize } from 'react-native/Libraries/Utilities/PixelRatio';
 import DataEntry from '../Data/DataEntry'
 import NfcManager, { NfcEvents } from 'react-native-nfc-manager';
 import firebase from '../../firebase/firebase_config';
-import {OverviewContext, OverviewContextSetter} from '../Overview/Context';
+import { OverviewContext, OverviewContextSetter } from '../Overview/Context';
+import Modal from 'react-native-modal';
+import {COLORS} from '../Colors/Colors';
+// import {CirclesLoader, PulseLoader, TextLoader, ColorDotsLoader} from 'react-native-indicator';
 
-let color1 = '#3F855B';
-let color2 = '#a83a32';
+
+let color1 = COLORS.enableButton;
+let color2 = COLORS.disableButton;
 
 
 
@@ -20,48 +24,33 @@ const NFCScreen = props => {
     const [buttonText, setButtonText] = useState("Enable NFC")
     const toggleSwitch = () => setIsEnabled(previousState => !previousState);
     const overview = firebase.firestore().collection('overview');
-    const initNFC = () => {
-        NfcManager.start();
-    };
 
-    const readNFC = () => {
-        const cleanUp = () => {
-            NfcManager.setEventListener(NfcEvents.DiscoverTag, null);
-            NfcManager.setEventListener(NfcEvents.SessionClosed, null);
-        };
-
-        return new Promise((resolve) => {
-            let tagFound = null;
-
-            NfcManager.setEventListener(NfcEvents.DiscoverTag, (tag) => {
-                tagFound = tag;
-                console.log(tagFound);
-                setTest(tagFound);
-                resolve(tag);
-                NfcManager.setAlertMessage('NFC card found!');
-                NfcManager.unregisterTagEvent().catch(() => 0);
-            });
-
-            NfcManager.setEventListener(NfcEvents.SessionClosed, () => {
-                cleanUp();
-                if (!tagFound) {
-                    resolve();
-                }
-            });
-
-            NfcManager.registerTagEvent();
-        });
-    }
     const state = useContext(OverviewContext);
     const setNFCState = useContext(OverviewContextSetter);
+    const nfc = new Nfc();
     const onPressTurnOn = () => {
-        let items = {...state};
+        let items = { ...state };
         console.log("Merge turn on!");
         if (color === color1) {
             setColor(color2);
             setButtonText("Disable NFC");
             items.nfc = true;
             setNFCState(items);
+            console.log('IS ENABLED??? Answer: ' + nfc.checkEnabled());
+            setVisible(true);
+            
+            nfc.initNfc().catch(err => {
+                //setVisible(false);
+                alert('Init ' + err.toString());
+            })
+
+
+            nfc.readNdef().then(tag => {
+                addNFCReading(tag.toString());
+            }).catch(err => {
+               // alert(err.toString());
+            })
+
         }
         else {
             setColor(color1);
@@ -69,8 +58,7 @@ const NFCScreen = props => {
             items.nfc = false;
             setNFCState(items);
         }
-        initNFC();
-        readNFC();
+       
     };
 
 
@@ -81,21 +69,32 @@ const NFCScreen = props => {
     let min = new Date().getMinutes(); //To get the Current Minutes
     let dateTime = hours + ':' + min.toString().padStart(2, '0') + '  ' + date + '/' + month + '/' + year;
 
-    const addNFCReading = () => {
-        setNFCReading(currentReadings => [...currentReadings, "blana" + '   ' + dateTime.toString()]);
+    const addNFCReading = (val) => {
+        setNFCReading(currentReadings => [...currentReadings, val + '   ' + dateTime.toString()]);
     }
     const clearNFCReadings = () => {
         setNFCReading(currentReadings => []);
     };
 
+    const [visible, setVisible] = useState(false);
+
     return (
+
         <View>
             <View style={styles.viewButton}>
-                    <Pressable onPress={onPressTurnOn} style={({ pressed }) => [{ backgroundColor: color }, styles.activateButton]}>
-                        <Text style={styles.text}>{buttonText}</Text>
-                        {/* //pressed ? color2 : color1 */}
-                    </Pressable>
+                <Pressable onPress={onPressTurnOn} style={styles.activateButton}>
+                    <Text style={styles.text}>{buttonText}</Text>
+                    {/* //pressed ? color2 : color1 */}
+                </Pressable>
             </View>
+            <Modal isVisible={visible}>
+                <View style={styles.modal}>
+                    <Image style={styles.nfcImage} source={require('./nfc-icon.png')} />
+                    <Text>Scanning in progress...</Text>
+                    {/* <ColorDotsLoader /> */}
+                    <Button style={styles.cancelButton} onPress={() => { setVisible(false) }} title='Cancel' />
+                </View>
+            </Modal>
             <TouchableOpacity onPress={addNFCReading} style={styles.dataTitle}>
                 <Text style={styles.dataTitleText}> NFC Readings</Text>
                 <Pressable onPress={clearNFCReadings} style={styles.clearButton}>
@@ -110,6 +109,7 @@ const NFCScreen = props => {
 
 
 
+
     );
 };
 
@@ -117,7 +117,7 @@ NFCScreen.navigationOptions = (navData) => {
     return {
         headerTitle: 'NFC',
         headerStyle: {
-            backgroundColor: '#962CA8'
+            backgroundColor: COLORS.appBar
         },
         headerLeft: <HeaderButtons HeaderButtonComponent={CustomHeaderButton} >
             <Item title="menu" iconName="ios-menu" onPress={() => {
@@ -126,6 +126,50 @@ NFCScreen.navigationOptions = (navData) => {
         </HeaderButtons>
     };
 };
+
+class Nfc {
+    async initNfc() {
+        try {
+            await NfcManager.start();
+        } catch (e) {
+            throw e;
+        }
+
+    }
+
+    async checkEnabled() {
+        await NfcManager.isEnabled();
+    }
+
+    readNdef() {
+        const cleanUp = () => {
+            NfcManager.setEventListener(NfcEvents.DiscoverTag, null);
+            NfcManager.setEventListener(NfcEvents.SessionClosed, null);
+        }
+
+        return new Promise((resolve) => {
+            let tagFound = null;
+
+            NfcManager.setEventListener(NfcEvents.DiscoverTag, (tag) => {
+                tagFound = tag;
+                resolve(tagFound);
+                NfcManager.setAlertMessage('Ndef tag found ' + tagFound.name);
+                NfcManager.unregisterTagEvent().catch(() => 0);
+            });
+
+            NfcManager.setEventListener(NfcEvents.SessionClosed, () => {
+                cleanUp();
+                if (!tagFound) {
+                    resolve();
+                } else {
+                    console.log(tagFound.toString());
+                }
+            });
+
+            NfcManager.registerTagEvent();
+        });
+    }
+}
 
 const styles = StyleSheet.create({
     screenText: {
@@ -143,7 +187,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: 32,
         borderRadius: 4,
         elevation: 3,
-        margin: 10
+        margin: 10,
+        backgroundColor: COLORS.enableButton
     },
     viewButton: {
         justifyContent: 'center',
@@ -161,7 +206,7 @@ const styles = StyleSheet.create({
     dataTitle: {
         width: Dimensions.get('window').width,
         height: 50,
-        backgroundColor: '#3F855B',
+        backgroundColor: COLORS.secondaryColor,
         marginTop: 50,
         justifyContent: 'center',
         flexDirection: 'row',
@@ -176,7 +221,7 @@ const styles = StyleSheet.create({
     clearButton: {
         justifyContent: 'center',
         marginLeft: 100,
-        backgroundColor: '#962CA8',
+        backgroundColor: COLORS.enableButton,
         width: 60
     },
     dataEntry: {
@@ -185,6 +230,22 @@ const styles = StyleSheet.create({
     },
     dataEntryText: {
         marginLeft: 60
+    },
+    modal: {
+        height: '30%',
+        width: '70%',
+        backgroundColor: 'white',
+        alignItems: 'center',
+        alignSelf: 'center',
+        justifyContent: 'space-between',
+        padding: 20
+    },
+    nfcImage: {
+        height: '40%',
+        width: '40%'
+    },
+    cancelButton: {
+        backgroundColor: COLORS.disableButton
     }
 });
 

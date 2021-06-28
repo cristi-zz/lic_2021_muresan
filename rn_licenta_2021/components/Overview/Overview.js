@@ -6,6 +6,7 @@ import FunctionalityTile from './FunctionalityTile';
 import firebase, { database } from '../../firebase/firebase_config';
 import { OverviewContext, OverviewContextSetter } from '../Overview/Context';
 import { ForceTouchGestureHandler } from 'react-native-gesture-handler';
+import {COLORS} from '../Colors/Colors';
 
 
 const Overview = props => {
@@ -23,48 +24,25 @@ const Overview = props => {
 
     let context = useContext(OverviewContext);
     const secondContext = useContext(OverviewContextSetter);
-    const [colorNFC, setColorNFC] = useState(color2);
-    const [colorBluetooth, setColorBlue] = useState(color2);
-    const [colorGPS, setColorGPS] = useState(color2);
-    const [colorGyroscope, setColorGyroscope] = useState(color2);
 
     useEffect(()=> {
-        if(context.nfc){
-            setColorNFC(color1);
-        }else{
-            setColorNFC(color2);
-        }
-
-        if(context.bluetooth){
-            setColorBlue(color1);
-        }else{
-            setColorBlue(color2);
-        }
-
-        if(context.gps){
-            setColorGPS(color1);
-        }else{
-            setColorGPS(color2);
-        }
-
-        if(context.gyroscope){
-            setColorGyroscope(color1);
-        }else{
-            setColorGyroscope(color2);
-        }
-
+        // if(context.nfc){
+        //     setColorNFC(color1);
+        // }else{
+        //     setColorNFC(color2);
+        // }
     }, [context]);
 
 
     return (
         <View>
             <View style={{ flexDirection: 'row' }}>
-                <FunctionalityTile name={'NFC'} state={context.nfc} color={colorNFC} />
-                <FunctionalityTile name={"Bluetooth"} state={context.bluetooth} color={colorBluetooth} />
+                <FunctionalityTile name={'NFC'} state={context.nfc} />
+                <FunctionalityTile name={"Bluetooth"} state={context.bluetooth} />
             </View>
             <View style={{ flexDirection: 'row' }}>
-                <FunctionalityTile name={"Gyroscope"} state={context.gyroscope} color={colorGyroscope} />
-                <FunctionalityTile name={"GPS"} state={context.gps} color={colorGPS} />
+                <FunctionalityTile name={"Gyroscope"} state={context.gyroscope} />
+                <FunctionalityTile name={"GPS"} state={context.gps}/>
             </View>
         </View>
     );
@@ -80,7 +58,7 @@ Overview.navigationOptions = (navData) => {
     return {
         headerTitle: 'Overview functionalities',
         headerStyle: {
-            backgroundColor: '#962CA8'
+            backgroundColor: COLORS.appBar
         },
         headerLeft: <HeaderButtons HeaderButtonComponent={CustomHeaderButton} >
             <Item title="menu" iconName="ios-menu" onPress={() => {

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Button, TextInput, TouchableOpacity, ToastAndroid } from 'react-native';
 import firebase from '../../firebase/firebase_config';
+import {COLORS} from '../Colors/Colors';
 
 
 
@@ -31,8 +32,7 @@ const LoginScreen = props => {
                 </TouchableOpacity>
                 <View style={styles.signUpSection}>
                     <Text>You don't have an account?
-                        <Text style={styles.signUp}
-                            onPress={() => { props.navigation.navigate({ routeName: 'Register' }) }}> Sign Up.</Text>
+                        <Text style={styles.signUp} onPress={() => { props.navigation.navigate({ routeName: 'Register' }) }}> Sign Up.</Text>
                     </Text>
                 </View>
             </View>
@@ -45,7 +45,7 @@ LoginScreen.navigationOptions = (navData) => {
     return {
         headerTitle: 'Login',
         headerStyle: {
-            backgroundColor: '#962CA8'
+            backgroundColor: COLORS.appBar
         }
     };
 };
@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
         margin: 5
 
     }, button: {
-        backgroundColor: '#3F855B',
+        backgroundColor: COLORS.enableButton,
         marginTop: 20,
         height: 48,
         width: 200,
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     },
     signUp: {
         fontSize: 16,
-        color: '#3F855B'
+        color: COLORS.enableButton
     }
 });
 

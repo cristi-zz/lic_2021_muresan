@@ -1,15 +1,15 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useReducer } from 'react';
 import { View, Text, StyleSheet, Button, Pressable, Dimensions, ScrollView } from 'react-native';
 import { HeaderButtons, Item } from 'react-navigation-header-buttons';
 import { Ionicons } from '@expo/vector-icons';
 import CustomHeaderButton from '../HeaderButton';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { BleManager } from 'react-native-ble-plx';
+import { BleManager, Device } from 'react-native-ble-plx';
 import {OverviewContext, OverviewContextSetter} from '../Overview/Context';
+import {COLORS} from '../Colors/Colors';
 
-
-let color1 = '#3F855B';
-let color2 = '#a83a32';
+let color1 = COLORS.enableButton;
+let color2 = COLORS.disableButton;
 
 export const manager = new BleManager();
 
@@ -20,7 +20,38 @@ const BluetoothScreen = props => {
     const [blueDevices, setBlueDevice] = useState([]);
     const state = useContext(OverviewContext);
     const setState = useContext(OverviewContextSetter);
+    const [scannedDevices, dispatch] = useReducer(reducer, []);
 
+    const reducer = ( state, action ) => {
+        switch(action.type){
+            case 'add': 
+                const device = action.device;
+                if(device && !state.find((dev) => dev.id === device.id)) {
+                    return [...state, device];
+                }
+                return state;
+            case 'clearAll':
+                return [];
+            default:
+                return state;
+        }
+    };
+
+    const scanDevices = () => {
+        manager.startDeviceScan(null, null, (error, scannedDevice) => {
+            if(error){
+                alert(error.reason.toString());
+            }
+
+            if(scannedDevice){
+                dispatch({type: 'add', device: scannedDevice});
+            }
+
+        });
+        setTimeout(() => {
+            manager.stopDeviceScan();
+        }, 5000);
+    }
     const onPressTurnOn = () => {
 
         console.log("Merge turn on!");
@@ -30,38 +61,14 @@ const BluetoothScreen = props => {
             setButtonText("Disable bluetooth");
             items.bluetooth = true;
             setState(items);
+            scanDevices();
         }
         else {
             setColor(color1);
             setButtonText("Enable bluetooth");
             items.bluetooth = false;
             setState(items);
-        }
-        if (color === color2) {
             manager.stopDeviceScan();
-        }
-        else {
-            manager.startDeviceScan(null, null, (error, device) => {
-                if (error) {
-                    // Handle error (scanning will be stopped automatically)
-                    console.log(error);
-                    return
-                }
-                console.log(device);
-                // Check if it is a device you are looking for based on advertisement data
-                // or other criteria.
-                if (device) {
-                    setBlueDevice(currentDevices => [...currentDevices, device.name])
-                }
-                else {
-                    // Stop scanning as it's not necessary if you are scanning for one device.
-                    console.log("Nu gasim nimic");
-                    manager.stopDeviceScan();
-                    console.log("Nu gasim nimic");
-
-                    // Proceed with connection.
-                }
-            });
         }
     };
 
@@ -88,7 +95,7 @@ const BluetoothScreen = props => {
                 </Pressable>
             </TouchableOpacity>
             <ScrollView>
-                {blueDevices.map((blueDevice) => { return (<View style={styles.bluetoothDeviceEntry}><Text>{blueDevice}</Text></View>); })}
+                {scannedDevices.map((blueDevice) => { return (<View style={styles.bluetoothDeviceEntry}><Text>{scannedDevices.name}</Text></View>); })}
             </ScrollView>
         </View>
     );
@@ -98,7 +105,7 @@ BluetoothScreen.navigationOptions = (navData) => {
     return {
         headerTitle: 'Bluetooth',
         headerStyle: {
-            backgroundColor: '#962CA8'
+            backgroundColor: COLORS.appBar
         },
         headerLeft: <HeaderButtons HeaderButtonComponent={CustomHeaderButton} >
             <Item title="menu" iconName="ios-menu" onPress={() => {
@@ -140,7 +147,7 @@ const styles = StyleSheet.create({
         color: 'white',
     },
     bluetoothContainer: {
-        backgroundColor: '#70db9b',
+        backgroundColor: COLORS.secondaryColor,
         width: Dimensions.get('window').width,
         height: 50,
         marginTop: 70,
@@ -162,7 +169,7 @@ const styles = StyleSheet.create({
     clearButton: {
         justifyContent: 'center',
         marginLeft: 100,
-        backgroundColor: '#962CA8',
+        backgroundColor: COLORS.enableButton,
         width: 60
     },
 });

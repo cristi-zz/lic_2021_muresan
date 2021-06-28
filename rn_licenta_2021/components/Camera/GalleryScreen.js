@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import CustomHeaderButton from '../HeaderButton';
 import { PickerItem } from 'react-native/Libraries/Components/Picker/Picker';
 import { isRequired } from 'react-native/Libraries/DeprecatedPropTypes/DeprecatedColorPropType';
+import {COLORS} from '../Colors/Colors';
 
 
 const GalleryScreen = props => {
@@ -22,7 +23,7 @@ GalleryScreen.navigationOptions = (navData) => {
     return {
         headerTitle: 'Gallery',
         headerStyle: {
-            backgroundColor: '#962CA8'
+            backgroundColor: COLORS.enableButton
         }
     };
 };

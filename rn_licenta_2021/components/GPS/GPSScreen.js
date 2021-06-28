@@ -1,15 +1,19 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { View, Text, StyleSheet, Button, Pressable, TouchableHighlight, Switch, TouchableOpacity, Dimensions, ScrollView } from 'react-native';
 import { HeaderButtons, Item } from 'react-navigation-header-buttons';
 import CustomHeaderButton from '../HeaderButton';
 import { getPixelSizeForLayoutSize } from 'react-native/Libraries/Utilities/PixelRatio';
 import DataEntry from '../Data/DataEntry'
 import GPSDataEntry from './GPSDataEntry'
-import RNLocation from 'react-native-location';
+import RNLocation, { subscribeToLocationUpdates } from 'react-native-location';
 import {OverviewContext, OverviewContextSetter} from '../Overview/Context';
+import Colors from '../Colors/Colors';
+import * as Location from 'expo-location';
+import firebase, {database} from '../../firebase/firebase_config';
+import {COLORS} from '../Colors/Colors';
 
-let color1 = '#3F855B';
-let color2 = '#a83a32';
+let color1 = COLORS.enableButton;
+let color2 = COLORS.disableButton;
 
 //distanceFilter - distanta minima in metrii intre vechea locatie si noua locatie pentru a se updata
 RNLocation.configure({
@@ -19,13 +23,25 @@ RNLocation.configure({
 const GPSScreen = props => {
     const [color, setColor] = useState(color1);
     const [buttonText, setButtonText] = useState("Enable location");
-    const [latitude, setLatitude] = useState(0);
-    const [longitude, setLongitude] = useState(0);
+    const [coords, setCoords] = useState(0);
     const state = useContext(OverviewContext);
     const setState = useContext(OverviewContextSetter);
 
+
+    useEffect(() => {
+        (async () => {
+            let {status} = await Location.requestForegroundPermissionsAsync();
+            if(status !== 'granted'){
+                alert('Permissions not granted');
+                return;
+            }
+            console.log('Blanaaaa');
+        })().catch(err => console.log(alert(err.toString())));
+    }, []);
+
     let location;
     const permissionHandler = async () => {
+        console.log('ajunge aici');
 
         let permission = await RNLocation.checkPermission({
             android: {
@@ -52,41 +68,35 @@ const GPSScreen = props => {
         }
         
         location = RNLocation.getLatestLocation({ timeout: 100 });
-        setLatitude(location.latitude);
-        setLongitude(location.longitude);
+        setCoords(location.coords);
+        console.log('aiciiii');
         console.log(location);
 
     }
 
     const onPressTurnOn = () => {
         console.log("Merge turn on!");
-        let items = {...state};
-        if (color === color1) {
-            setColor(color2);
-            setButtonText("Disable location");
-            items.gps = true;
-            setState(items);
-        }
-        else {
-            setColor(color1);
-            setButtonText("Enable location");
-            items.gps = false;
-            setState(items);
-        }
-        permissionHandler();
-
-
-
+        // let items = {...state};
+        //items.gps
+        //permissionHandler();
+        (async()=>{
+            let location = await Location.getCurrentPositionAsync({});
+            setCoords(location.coords);
+            let geo = await Location.reverseGeocodeAsync(location.coords);
+            console.log(geo);
+        })();
     };
+
+
     return (
         <View>
             <View style={styles.viewButton}>
-                <Pressable onPress={onPressTurnOn} style={({ pressed }) => [{ backgroundColor: color }, styles.activateButton]}>
+                <Pressable onPress={onPressTurnOn} style={styles.activateButton}>
                     <Text style={styles.text}>{buttonText}</Text>
                     {/* //pressed ? color2 : color1 */}
                 </Pressable>
             </View>
-            <GPSDataEntry latitude={latitude} longitude={longitude} />
+            <GPSDataEntry coords={coords} />
         </View>
     );
 };
@@ -94,7 +104,7 @@ GPSScreen.navigationOptions = (navData) => {
     return {
         headerTitle: 'GPS',
         headerStyle: {
-            backgroundColor: '#962CA8'
+            backgroundColor: COLORS.appBar
         },
         headerLeft: <HeaderButtons HeaderButtonComponent={CustomHeaderButton} >
             <Item title="menu" iconName="ios-menu" onPress={() => {
@@ -120,7 +130,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: 32,
         borderRadius: 4,
         elevation: 3,
-        margin: 10
+        margin: 10,
+        backgroundColor: COLORS.enableButton
     },
     viewButton: {
         justifyContent: 'center',
@@ -138,7 +149,7 @@ const styles = StyleSheet.create({
     dataTitle: {
         width: Dimensions.get('window').width,
         height: 50,
-        backgroundColor: '#3F855B',
+        backgroundColor: COLORS.primaryColor,
         marginTop: 50,
         justifyContent: 'center',
         flexDirection: 'row',
@@ -153,7 +164,7 @@ const styles = StyleSheet.create({
     clearButton: {
         justifyContent: 'center',
         marginLeft: 100,
-        backgroundColor: '#962CA8',
+        backgroundColor: COLORS.disableButton,
         width: 60
     },
     dataEntry: {
