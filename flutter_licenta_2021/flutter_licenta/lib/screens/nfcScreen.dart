@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_licenta/login/authentication.dart';
 import 'package:flutter_licenta/notifiers/functionalityState.dart';
+import 'package:nfc_manager/platform_tags.dart';
 import 'package:provider/provider.dart';
 import '../routes/drawerNavigation.dart';
 import 'package:flutter_licenta/routes/routes.dart';
@@ -39,7 +40,7 @@ class List extends StatefulWidget {
 }
 
 class _ListState extends State<List> {
-  final items = <String>[];
+  final items = [];
 
   bool isEnabled = false;
   String title = 'Enable';
@@ -68,12 +69,23 @@ class _ListState extends State<List> {
       print(isAvailable);
       if (isAvailable) {
         NfcManager.instance.startSession(onDiscovered: (NfcTag tag) async {
+          var entry = {
+            'tech': tag.data.keys.first,
+            'identifier': tag.data.entries.first.value['identifier']
+          };
           setState(() {
-            items.add(tag.toString());
+            items.add(entry);
+            print(tag.data.entries);
+            // IsoDep? iso = IsoDep.from(tag);   -- procesare tag cu technologia isodep
           });
 
           NfcManager.instance.stopSession();
           bl.close();
+          setState(() {
+            title = 'Enable';
+            isEnabled = false;
+          });
+
           return;
         });
       } else {
@@ -87,25 +99,30 @@ class _ListState extends State<List> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(mainAxisAlignment: MainAxisAlignment.start, children: [
-      Padding(
-          padding: const EdgeInsets.all(20),
-          child: ElevatedButton(
-              child: Text(title),
-              onPressed: () => nfcRead(context),
-              style: ElevatedButton.styleFrom(
-                  primary: isEnabled ? disableButton : enableButton,
-                  fixedSize: Size(200, 50)))),
-      ListView.builder(
-        physics: NeverScrollableScrollPhysics(),
-        shrinkWrap: true,
-        itemCount: items.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text('${items[index]}'),
-          );
-        },
-      )
-    ]);
+    return Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+              padding: const EdgeInsets.all(20),
+              child: ElevatedButton(
+                  child: Text(title),
+                  onPressed: () => nfcRead(context),
+                  style: ElevatedButton.styleFrom(
+                      primary: isEnabled ? disableButton : enableButton,
+                      fixedSize: Size(200, 50)))),
+          DataTable(
+              columns: [
+                DataColumn(label: Text('Technology')),
+                DataColumn(label: Text('Identifier'))
+              ],
+              rows: items.map((entry) {
+                print(entry['tech']);
+                return new DataRow(cells: [
+                  DataCell(Text(entry['tech'].toString())),
+                  DataCell(Text(entry['identifier'].toString()))
+                ]);
+              }).toList())
+        ]);
   }
 }

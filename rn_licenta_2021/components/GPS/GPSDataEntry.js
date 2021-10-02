@@ -8,8 +8,11 @@ import { database } from '../../firebase/firebase_config';
 import * as Location from 'expo-location';
 import {COLORS} from '../Colors/Colors';
 
+// component for the gps functionality
 const GPSDataEntry = props => {
     const [locations, setLocations] = useState([]);
+
+    //useEffect - used here to get the saved locations from the database
     useEffect(() => {
         (async () => {
             let location = await database.collection('location').get().then((val) => {
@@ -21,6 +24,7 @@ const GPSDataEntry = props => {
         })();
     }, []);
 
+    // used to save the location into database
     const saveButtonHandler = () => {
         (async () => {
             let geo = await Location.reverseGeocodeAsync(props.coords);
@@ -41,6 +45,7 @@ const GPSDataEntry = props => {
         })();
     }
 
+    //deletes every location from the database
     const clearAllHandler = () => {
         try{
                 database.collection('location'). get().then(snapshot => {

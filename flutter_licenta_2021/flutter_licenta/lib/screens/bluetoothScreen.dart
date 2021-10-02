@@ -37,7 +37,7 @@ class BluetoothRead extends StatefulWidget {
 }
 
 class _BluetoothState extends State<BluetoothRead> {
-  final items = <String>[];
+  final items = [];
 
   bool isEnabled = false;
   String title = 'Enable';
@@ -45,12 +45,12 @@ class _BluetoothState extends State<BluetoothRead> {
   Future<void> bluetoothRead(BuildContext context) async {
     FlutterBlue fb = FlutterBlue.instance;
     BottomLoader bl = new BottomLoader(context, isDismissible: true);
+    bl.style(message: 'Scanning BLE devices...');
 
     if (isEnabled == false) {
       setState(() {
         title = 'Disable';
         isEnabled = true;
-        items.add('Blana');
       });
     } else {
       setState(() {
@@ -63,25 +63,31 @@ class _BluetoothState extends State<BluetoothRead> {
       bool isAvailable = await fb.isAvailable;
       if (isAvailable) {
         await bl.display();
+        setState(() {
+          items.clear();
+        });
         try {
-          await fb.startScan(timeout: Duration(seconds: 5));
+          await fb.startScan(timeout: Duration(seconds: 10));
         } catch (e) {
           showAlert(context, 'e');
         }
 
-        var subscription = fb.scanResults.listen((results) {
+        var subscription = await fb.scanResults.listen((results) {
           for (ScanResult r in results) {
-            items.add(r.device.name.toString());
-            print('${r.device.name} found! rssi: ${r.rssi}');
+            if (r.device.name.isNotEmpty) {
+              var entry = {'name': r.device.name, 'rssi': r.rssi};
+              items.add(entry);
+              print(r.device.toString());
+            }
           }
         });
-        setState(() {
-          items.add('blana');
-        });
+        setState(() {});
 
         subscription.cancel();
         fb.stopScan();
         bl.close();
+        title = 'Enable';
+        isEnabled = false;
       } else {
         showAlert(context, 'Not available! Check if it is enabled.');
       }
@@ -90,25 +96,30 @@ class _BluetoothState extends State<BluetoothRead> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(mainAxisAlignment: MainAxisAlignment.start, children: [
-      Padding(
-          padding: const EdgeInsets.all(20),
-          child: ElevatedButton(
-              child: Text(title),
-              onPressed: () => bluetoothRead(context),
-              style: ElevatedButton.styleFrom(
-                  primary: isEnabled ? disableButton : enableButton,
-                  fixedSize: Size(200, 50)))),
-      ListView.builder(
-        physics: NeverScrollableScrollPhysics(),
-        shrinkWrap: true,
-        itemCount: items.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text('${items[index]}'),
-          );
-        },
-      )
-    ]);
+    return Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+              padding: const EdgeInsets.all(20),
+              child: ElevatedButton(
+                  child: Text(title),
+                  onPressed: () => bluetoothRead(context),
+                  style: ElevatedButton.styleFrom(
+                      primary: isEnabled ? disableButton : enableButton,
+                      fixedSize: Size(200, 50)))),
+          DataTable(
+              columns: [
+                DataColumn(label: Text('Device name')),
+                DataColumn(label: Text('RSSI'))
+              ],
+              rows: items.map((entry) {
+                print(entry['tech']);
+                return new DataRow(cells: [
+                  DataCell(Text(entry['name'].toString())),
+                  DataCell(Text(entry['rssi'].toString()))
+                ]);
+              }).toList())
+        ]);
   }
 }

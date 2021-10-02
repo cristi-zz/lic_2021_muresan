@@ -44,6 +44,7 @@ const BluetoothNavigator = createStackNavigator({
     Bluetooth: BluetoothScreen
 });
 
+// navigator between functionalities(drawer navigator)
 const AppNavigator = createDrawerNavigator({
     Overview: OverviewNavigator,
     NFC: NFCNavigator,

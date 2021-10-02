@@ -12,16 +12,21 @@ import Icon from 'react-native-ionicons';
 import {COLORS} from '../Colors/Colors';
 
 
+// Camera functionality
 const CameraScreen = props => {
+    // useState - state hook - check ReactNative documentation
     const [cameraMode, setCameraMode] = useState(false);
     const [galleryMode, setGalleryMode] = useState(false);
     const [imageArray, setImageArray] = useState([]);
+
+    // used to add photos to the array for printing purposes
     const addPhoto = (data) => {
         setImageArray(currentImages => [...currentImages, { key: uuidv4(), value: data.uri }])
     }
 
     let camera;
 
+    // used to take a picture for the camera functionality
     const takePicture = async () => {
         if (camera) {
             const data = await camera.takePictureAsync();
@@ -79,6 +84,7 @@ const CameraScreen = props => {
     );
 };
 
+// check navigation options in the documentation for more info
 CameraScreen.navigationOptions = (navData) => {
     return {
         headerTitle: 'Camera',

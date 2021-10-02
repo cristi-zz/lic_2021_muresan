@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { TouchableOpacity, View, Text, StyleSheet, Switch } from 'react-native';
 import {COLORS} from '../Colors/Colors';
 
-
+// component for tiles
 const FunctionalityTile = props => {
 
     const onPressColor = () => {
@@ -15,7 +15,7 @@ const FunctionalityTile = props => {
                 <Text style={styles.textTitle}>{props.name}</Text>
 
                 <View style={styles.container}>
-                    <Text style={styles.activeText}>{props.value}</Text>
+                    <Text style={styles.activeText}>{}</Text>
                 </View>
             </View>
         </TouchableOpacity>
@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
         margin: 30,
         height: 150,
         width: 100,
-        // backgroundColor: '#70db9b'
+        //backgroundColor: '#7F6A93'
     },
     tile: {
         flex: 1,

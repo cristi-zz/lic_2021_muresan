@@ -1,18 +1,21 @@
-import React from 'react';
+import React, {useEffect, useState, useContext} from 'react';
 import { View, Text, StyleSheet, Button, TextInput, TouchableOpacity, ToastAndroid } from 'react-native';
 import firebase from '../../firebase/firebase_config';
 import {COLORS} from '../Colors/Colors';
+import {OverviewContext, OverviewContextSetter} from '../Overview/Context';
 
-
-
+// component for login screen 
 const LoginScreen = props => {
     const [email, onChangeEmail] = React.useState(null);
     const [password, onChangePassword] = React.useState(null);
+    const loginState = useContext(OverviewContext);
+    const setLoginState = useContext(OverviewContextSetter);
     
+    // login with the help of firebase (BaaS)
     const onLoginPress = () => {
         firebase.auth()
         .signInWithEmailAndPassword(email, password)
-        .then(() => props.navigation.navigate({routeName: 'App'}))
+        .then(() => {props.navigation.navigate({routeName: 'App'}), setLoginState(true) })
         .catch(error => console.log(error))
         ToastAndroid.showWithGravityAndOffset(
             "Welcome!",

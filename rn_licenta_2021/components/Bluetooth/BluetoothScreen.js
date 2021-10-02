@@ -8,20 +8,21 @@ import { BleManager, Device } from 'react-native-ble-plx';
 import {OverviewContext, OverviewContextSetter} from '../Overview/Context';
 import {COLORS} from '../Colors/Colors';
 
+// colors used for the activation button, depending on state
 let color1 = COLORS.enableButton;
 let color2 = COLORS.disableButton;
 
 export const manager = new BleManager();
 
+// Bluetooth functionality
 const BluetoothScreen = props => {
     const [color, setColor] = useState(color1);
     const [buttonText, setButtonText] = useState("Enable bluetooth")
     const toggleSwitch = () => setIsEnabled(previousState => !previousState);
     const [blueDevices, setBlueDevice] = useState([]);
-    const state = useContext(OverviewContext);
-    const setState = useContext(OverviewContextSetter);
-    const [scannedDevices, dispatch] = useReducer(reducer, []);
 
+
+    // reducer - add (checks if device was already added, if not add it) and clearall (cleans the list of devices)
     const reducer = ( state, action ) => {
         switch(action.type){
             case 'add': 
@@ -36,7 +37,9 @@ const BluetoothScreen = props => {
                 return state;
         }
     };
+    const [scannedDevices, dispatch] = useReducer(reducer, []);
 
+    // used for scanning the devices, for more info check the used library (react-native-ble-plx)
     const scanDevices = () => {
         manager.startDeviceScan(null, null, (error, scannedDevice) => {
             if(error){
@@ -44,40 +47,41 @@ const BluetoothScreen = props => {
             }
 
             if(scannedDevice){
-                dispatch({type: 'add', device: scannedDevice});
+                if(scannedDevice.name !== null){
+                    dispatch({type: 'add', device: scannedDevice});
+                    //console.log(scannedDevice);
+                }
+                
             }
 
         });
         setTimeout(() => {
             manager.stopDeviceScan();
+            setColor(color1);
+            setButtonText("Enable bluetooth");
         }, 5000);
     }
     const onPressTurnOn = () => {
 
         console.log("Merge turn on!");
-        let items = {...state};
         if (color === color1) {
             setColor(color2);
             setButtonText("Disable bluetooth");
-            items.bluetooth = true;
-            setState(items);
             scanDevices();
         }
         else {
             setColor(color1);
             setButtonText("Enable bluetooth");
-            items.bluetooth = false;
-            setState(items);
             manager.stopDeviceScan();
         }
     };
 
 
     const addBlueDevice = () => {
-        setBlueDevice(currentDevices => [...currentDevices, "blana"]);
+        setBlueDevice(currentDevices => [...currentDevices, "test"]);
     }
     const clearBlueDevices = () => {
-        setBlueDevice(currentDevices => []);
+        dispatch({type: 'clearAll'});
     };
 
     return (
@@ -94,13 +98,20 @@ const BluetoothScreen = props => {
                     <Text style={styles.bluetoothDevicesText} >Clear</Text>
                 </Pressable>
             </TouchableOpacity>
+            <View style={styles.bluetoothTitle}>
+                <Text style={styles.bluetoothTitleText}>Device name</Text>
+                <Text style={styles.bluetoothTitleText}>RSSI</Text>
+            </View>
             <ScrollView>
-                {scannedDevices.map((blueDevice) => { return (<View style={styles.bluetoothDeviceEntry}><Text>{scannedDevices.name}</Text></View>); })}
+                {scannedDevices.map((blueDevice) => { return (<View style={styles.bluetoothDeviceEntry}>
+                    <Text>{blueDevice.name}</Text>
+                    <Text>{blueDevice.rssi}</Text></View>); })}
             </ScrollView>
         </View>
     );
 };
 
+// check navigation options in the documentation for more info
 BluetoothScreen.navigationOptions = (navData) => {
     return {
         headerTitle: 'Bluetooth',
@@ -156,6 +167,21 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignContent: 'space-between'
     },
+    bluetoothTitle: {
+
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        padding: 20,
+        marginLeft: 20,
+        marginRight: 20,
+        borderBottomWidth: 2,
+        borderBottomColor: 'gray'
+    },
+    bluetoothTitleText: {
+        fontWeight: 'bold',
+        textTransform: 'uppercase',
+        fontSize: 14,
+    },
     bluetoothDevicesText: {
         textAlign: 'center',
         textAlignVertical: 'center',
@@ -163,8 +189,11 @@ const styles = StyleSheet.create({
         fontSize: 18,
     },
     bluetoothDeviceEntry: {
-        backgroundColor: '#d1c8b0',
-        padding: 10
+        padding: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: 'gray',
+        flexDirection: 'row',
+        justifyContent: 'space-between'
     },
     clearButton: {
         justifyContent: 'center',

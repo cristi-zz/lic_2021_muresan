@@ -38,7 +38,8 @@ class Overview extends StatelessWidget {
               children: <Widget>[
                 FunctionalityCard(name: 'Bluetooth', state: false),
                 FunctionalityCard(name: 'Gyroscope', state: false)
-              ])
+              ]),
+          FunctionalityCard(name: 'Camera', state: false)
         ]),
         drawer: DrawerNavigation());
   }

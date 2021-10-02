@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
           if (snapshot.connectionState == ConnectionState.done) {
             return MaterialApp(
                 title: 'Welcome to Flutter',
-                home: CameraScreen(),
+                home: LoginPage(),
                 routes: {
                   pageRoutes.nfc: (context) => NFCScreen(),
                   pageRoutes.bluetooth: (context) => BluetoothScreen(),

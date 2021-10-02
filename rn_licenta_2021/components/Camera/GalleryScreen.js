@@ -8,6 +8,7 @@ import { isRequired } from 'react-native/Libraries/DeprecatedPropTypes/Deprecate
 import {COLORS} from '../Colors/Colors';
 
 
+// gallery component used for camera functionality
 const GalleryScreen = props => {
     let uri = props.uri;
 

@@ -4,6 +4,7 @@ import { HeaderButtons, Item } from 'react-navigation-header-buttons';
 import { Ionicons } from '@expo/vector-icons';
 import CustomHeaderButton from '../HeaderButton';
 
+// used for time/date
 const DataEntry = props => {
     let date = new Date().getDate(); //To get the Current Date
     let month = new Date().getMonth() + 1; //To get the Current Month

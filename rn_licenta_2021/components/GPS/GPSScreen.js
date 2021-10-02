@@ -20,6 +20,7 @@ RNLocation.configure({
     distanceFilter: 0
 })
 
+// GPS component
 const GPSScreen = props => {
     const [color, setColor] = useState(color1);
     const [buttonText, setButtonText] = useState("Enable location");
@@ -27,7 +28,7 @@ const GPSScreen = props => {
     const state = useContext(OverviewContext);
     const setState = useContext(OverviewContextSetter);
 
-
+    // useEffect hook(read more in the documentation) - used here for asking permission when this view is reached
     useEffect(() => {
         (async () => {
             let {status} = await Location.requestForegroundPermissionsAsync();
@@ -37,7 +38,7 @@ const GPSScreen = props => {
             }
             console.log('Blanaaaa');
         })().catch(err => console.log(alert(err.toString())));
-    }, []);
+    }, []); // use of "[]" means it only happens once
 
     let location;
     const permissionHandler = async () => {
@@ -74,6 +75,8 @@ const GPSScreen = props => {
 
     }
 
+    
+    // used to get the current location
     const onPressTurnOn = () => {
         console.log("Merge turn on!");
         // let items = {...state};

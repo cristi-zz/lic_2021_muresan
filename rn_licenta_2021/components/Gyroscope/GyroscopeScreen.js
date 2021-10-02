@@ -13,7 +13,7 @@ let color1 = COLORS.enableButton;
 let color2 = COLORS.disableButton;
 
 
-
+// component used for sensors functionality
 const GyroscopeScreen = props => {
     const [isEnabled, setIsEnabled] = useState(false);
     const state = useContext(OverviewContext);
@@ -42,6 +42,7 @@ const GyroscopeScreen = props => {
         Accelerometer.setUpdateInterval(400);
       };
     
+      // used to subscribe to sensors - gyroscope and accelerometer
       const _subscribe = () => {
           console.log('blanaaa');
         setSubscription(
@@ -54,6 +55,7 @@ const GyroscopeScreen = props => {
         }));
       };
     
+    // used to unsubscribe to sensors
       const _unsubscribe = () => {
         subscription && subscription.remove();
         subscriptionAcc && subscriptionAcc.remove();
@@ -64,6 +66,7 @@ const GyroscopeScreen = props => {
       const { xGyro, yGyro, zGyro } = dataGyro;
       const { xAcc, yAcc, zAcc } = dataAcc;
 
+    // useEffect - used here to update the sensors if isEnabled is True
     useEffect(()=> {
         if(isEnabled){
                 
@@ -76,6 +79,7 @@ const GyroscopeScreen = props => {
             Accelerometer.removeAllListeners();
         }
     },[isEnabled]);
+
     const onPressTurnOn = () => {
         console.log("Merge turn on!");
         _fast;

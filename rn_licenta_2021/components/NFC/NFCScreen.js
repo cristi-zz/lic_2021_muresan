@@ -9,14 +9,14 @@ import firebase from '../../firebase/firebase_config';
 import { OverviewContext, OverviewContextSetter } from '../Overview/Context';
 import Modal from 'react-native-modal';
 import {COLORS} from '../Colors/Colors';
-// import {CirclesLoader, PulseLoader, TextLoader, ColorDotsLoader} from 'react-native-indicator';
+import moment from 'moment';
 
 
 let color1 = COLORS.enableButton;
 let color2 = COLORS.disableButton;
 
 
-
+// component for NFC functionality
 const NFCScreen = props => {
     const [nfcReadings, setNFCReading] = useState([]);
     const [color, setColor] = useState(color1);
@@ -25,17 +25,15 @@ const NFCScreen = props => {
     const toggleSwitch = () => setIsEnabled(previousState => !previousState);
     const overview = firebase.firestore().collection('overview');
 
-    const state = useContext(OverviewContext);
-    const setNFCState = useContext(OverviewContextSetter);
     const nfc = new Nfc();
+
+    // activate search for NFC ( check react-native-nfc-manager library documentation for details)
     const onPressTurnOn = () => {
-        let items = { ...state };
+        
         console.log("Merge turn on!");
         if (color === color1) {
             setColor(color2);
             setButtonText("Disable NFC");
-            items.nfc = true;
-            setNFCState(items);
             console.log('IS ENABLED??? Answer: ' + nfc.checkEnabled());
             setVisible(true);
             
@@ -46,7 +44,12 @@ const NFCScreen = props => {
 
 
             nfc.readNdef().then(tag => {
-                addNFCReading(tag.toString());
+                var entry = {id: tag.id, tech: tag.techTypes[0].split('.').pop()}
+                addNFCReading(entry);
+                console.log(tag);
+                setVisible(false);
+                setColor(color1);
+                setButtonText("Enable NFC");
             }).catch(err => {
                // alert(err.toString());
             })
@@ -55,8 +58,6 @@ const NFCScreen = props => {
         else {
             setColor(color1);
             setButtonText("Enable NFC");
-            items.nfc = false;
-            setNFCState(items);
         }
        
     };
@@ -70,7 +71,7 @@ const NFCScreen = props => {
     let dateTime = hours + ':' + min.toString().padStart(2, '0') + '  ' + date + '/' + month + '/' + year;
 
     const addNFCReading = (val) => {
-        setNFCReading(currentReadings => [...currentReadings, val + '   ' + dateTime.toString()]);
+        setNFCReading(currentReadings => [...currentReadings, val]);
     }
     const clearNFCReadings = () => {
         setNFCReading(currentReadings => []);
@@ -101,13 +102,18 @@ const NFCScreen = props => {
                     <Text style={styles.dataTitleText}>Clear</Text>
                 </Pressable>
             </TouchableOpacity>
+            <View style={styles.dataEntry}>
+                <Text style={styles.dataEntryTitle}>Identifier</Text>
+                <Text style={styles.dataEntryTitle}>Technology</Text>
+            </View>
             <ScrollView>
-                {nfcReadings.map((nfc) => { return (<View style={styles.dataEntry}><Text style={styles.dataEntryText}>{nfc}</Text></View>); })}
+                {nfcReadings.map((nfc) => { return (<View style={styles.dataEntry}>
+                    <Text style={styles.dataEntryText}>{nfc.id}</Text>
+                    <Text style={styles.dataEntryText}>{nfc.tech}</Text>
+                    </View>); })}
             </ScrollView>
             <Text>{test}</Text>
         </View>
-
-
 
 
     );
@@ -127,7 +133,9 @@ NFCScreen.navigationOptions = (navData) => {
     };
 };
 
+// class for NFC functionality
 class Nfc {
+    //initialize manager
     async initNfc() {
         try {
             await NfcManager.start();
@@ -137,10 +145,12 @@ class Nfc {
 
     }
 
+
     async checkEnabled() {
         await NfcManager.isEnabled();
     }
 
+    //read NFC tag
     readNdef() {
         const cleanUp = () => {
             NfcManager.setEventListener(NfcEvents.DiscoverTag, null);
@@ -226,10 +236,19 @@ const styles = StyleSheet.create({
     },
     dataEntry: {
         borderWidth: 3,
-        margin: 1
+        margin: 1,
+        flexDirection: 'row',
+        justifyContent: 'space-around'
     },
     dataEntryText: {
-        marginLeft: 60
+        //marginLeft: 60
+    },
+    dataEntryTitle: {
+        textTransform: 'uppercase',
+        fontWeight: 'bold',
+        fontSize: 14
+        //marginLeft: 60,
+
     },
     modal: {
         height: '30%',

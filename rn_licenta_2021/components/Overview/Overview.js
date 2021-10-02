@@ -7,9 +7,11 @@ import firebase, { database } from '../../firebase/firebase_config';
 import { OverviewContext, OverviewContextSetter } from '../Overview/Context';
 import { ForceTouchGestureHandler } from 'react-native-gesture-handler';
 import {COLORS} from '../Colors/Colors';
+import moment from 'moment';
 
 
 const Overview = props => {
+    // tried using states to change the color of the tiles based on activation
     const [databaseData, setDatabaseData] = useState({
         nfc: false,
         bluetooth: false,
@@ -26,15 +28,10 @@ const Overview = props => {
     const secondContext = useContext(OverviewContextSetter);
 
     useEffect(()=> {
-        // if(context.nfc){
-        //     setColorNFC(color1);
-        // }else{
-        //     setColorNFC(color2);
-        // }
     }, [context]);
 
-
     return (
+        // the main window with the functionalities tiles
         <View>
             <View style={{ flexDirection: 'row' }}>
                 <FunctionalityTile name={'NFC'} state={context.nfc} />
@@ -44,6 +41,9 @@ const Overview = props => {
                 <FunctionalityTile name={"Gyroscope"} state={context.gyroscope} />
                 <FunctionalityTile name={"GPS"} state={context.gps}/>
             </View>
+            <View style={{ flexDirection: 'row' }}>
+            <FunctionalityTile name={"Camera"}/>
+            </View> 
         </View>
     );
 };

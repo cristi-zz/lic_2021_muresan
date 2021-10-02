@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Button, TextInput, TouchableOpacity, ToastAndro
 import firebase from '../../firebase/firebase_config';
 import {COLORS} from '../Colors/Colors';
 
-
+// component for registering using firebase
 const RegisterScreen = props => {
     const [email, onChangeEmail] = React.useState(null);
     const [password, onChangePassword] = React.useState(null);

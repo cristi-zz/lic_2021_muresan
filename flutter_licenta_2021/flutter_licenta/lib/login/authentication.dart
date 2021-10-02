@@ -68,7 +68,9 @@ class _LoginPageState extends State<LoginPage> {
                         }
                       }
                     },
-                    style: ElevatedButton.styleFrom(primary: enableButton)),
+                    style: ElevatedButton.styleFrom(
+                        primary: enableButton, minimumSize: Size(200, 50))),
+                SizedBox(height: 15),
                 ElevatedButton(
                     child: Text('Register'),
                     onPressed: () => {
@@ -77,7 +79,8 @@ class _LoginPageState extends State<LoginPage> {
                             MaterialPageRoute(builder: (context) => Register()),
                           )
                         },
-                    style: ElevatedButton.styleFrom(primary: enableButton))
+                    style: ElevatedButton.styleFrom(
+                        primary: enableButton, minimumSize: Size(200, 50)))
               ],
             )));
   }
